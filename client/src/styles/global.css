@@ -934,9 +934,6 @@ h4 { font-size: var(--text-xl); }
   .mission-name { font-size: 10px; }
   .header-timer { font-size: var(--text-sm); }
 
-  .left-panel {
-    padding-bottom: 56px;
-  }
   .left-panel:focus-within .ascii-ref-card {
     display: none;
   }

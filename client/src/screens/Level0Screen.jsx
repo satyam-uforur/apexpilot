@@ -169,6 +169,7 @@ export default function Level0Screen() {
                 ))}
               </div>
             </div>
+            <div className="fc-spacer" style={{ height: '56px', flexShrink: 0 }} />
           </div>
 
           {stage !== 'complete' && (
