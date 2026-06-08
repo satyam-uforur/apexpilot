@@ -98,8 +98,10 @@ export default function Level1Screen() {
 
       <div className="helipad-panel" style={{
         background: 'linear-gradient(to bottom, rgba(1,1,10,0.08), rgba(1,1,10,0.15) 40%, rgba(8,8,16,0.25) 100%)',
-        padding: '180px 40px 80px', gap: '16px',
+        padding: '40px 40px 80px', gap: '0',
+        justifyContent: 'flex-end',
       }}>
+        <div style={{ flex: 1, minHeight: 0 }} />
         <div className="card" style={{
           background: 'transparent', borderColor: 'rgba(232,232,240,0.08)',
           padding: 'var(--space-4)', overflow: 'auto',

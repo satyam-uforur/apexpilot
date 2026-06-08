@@ -2560,10 +2560,10 @@ input[type="range"].confidence-slider::-webkit-slider-thumb:active { transform: 
   width: min(520px, 90vw);
   background: #0E0E1C;
   border: 1px solid rgba(232,232,240,0.12);
-  padding: 40px;
+  padding: 32px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .eval-title {
@@ -2780,8 +2780,9 @@ input[type="range"].confidence-slider::-webkit-slider-thumb:active { transform: 
   .incident-key { min-width: 120px; font-size: 10px; }
   .prompt-textarea { min-height: 100px; font-size: 13px; }
   .helipad-submit { width: 100%; text-align: center; padding: 14px; font-size: 18px; clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%); }
-  .eval-box { padding: 24px 20px; }
+  .eval-box { padding: 20px 16px; gap: 10px; }
   .eval-row-label { width: 120px; font-size: 10px; }
+  .eval-feedback { font-size: 10px; }
   .extraction-word { font-size: 52px; }
   .extraction-subtext { font-size: 12px; padding: 0 20px; }
 }

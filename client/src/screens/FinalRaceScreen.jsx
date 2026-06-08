@@ -355,28 +355,28 @@ export default function FinalRaceScreen() {
             {evalPhase >= 5 && (
               <div className="eval-feedback">
                 {evalResult.fieldsPresent < 8 && (
-                  <div className="eval-feedback-item issue">
-                    Missing fields: {TARGET_FIELDS.filter((_, i) => !evalResult.fieldMentions[i].found).map(f => f.key).join(', ')}
+                  <div className="eval-feedback-item issue" style={{ fontSize: '11px', lineHeight: '1.5' }}>
+                    MISSING: {TARGET_FIELDS.filter((_, i) => !evalResult.fieldMentions[i].found).map(f => f.key).join(', ')}
                   </div>
                 )}
                 {evalResult.dataTypesScore < 15 && (
-                  <div className="eval-feedback-item issue">
-                    Specify boolean and integer types in your prompt
+                  <div className="eval-feedback-item issue" style={{ fontSize: '11px', lineHeight: '1.5' }}>
+                    Specify boolean & integer types
                   </div>
                 )}
                 {evalResult.jsonOnlyScore < 15 && (
-                  <div className="eval-feedback-item issue">
-                    Add "return ONLY valid JSON \u2014 no explanation" to your prompt
+                  <div className="eval-feedback-item issue" style={{ fontSize: '11px', lineHeight: '1.5' }}>
+                    Add "return ONLY valid JSON — no explanation"
                   </div>
                 )}
                 {evalResult.nullHandlingScore < 15 && (
-                  <div className="eval-feedback-item issue">
-                    Add null handling for missing fields (e.g. "use null if not found")
+                  <div className="eval-feedback-item issue" style={{ fontSize: '11px', lineHeight: '1.5' }}>
+                    Add null handling for missing fields
                   </div>
                 )}
                 {evalResult.fieldsPresent >= 8 && evalResult.dataTypesScore >= 10 && evalResult.jsonOnlyScore >= 10 && (
-                  <div className="eval-feedback-item ok">
-                    Strong prompt structure. Fine-tune for full marks.
+                  <div className="eval-feedback-item ok" style={{ fontSize: '11px', lineHeight: '1.5' }}>
+                    Strong prompt. Fine-tune for full marks.
                   </div>
                 )}
               </div>
