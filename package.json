@@ -1,0 +1,16 @@
+{
+  "name": "apexrank",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ApexRank — Competitive AI-skill ranking platform",
+  "scripts": {
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
+    "build": "cd client && npm run build",
+    "vercel-build": "cd server && npm ci && cd ../client && npm ci && npm run build",
+    "start": "cd server && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

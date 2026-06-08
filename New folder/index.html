@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>APEXRANK · THE ASCENT</title>
+<style>
+/* ============================================================
+   APEXRANK — ENTRY / HOME PAGE
+   Brutalist Sci-Fi Operations Center + Physical Tower
+   3D realistic tower rendered with WebGL (Three.js) + CSS fallback
+   ============================================================ */
+
+/* Google Fonts — load full game type system.
+   NOTE: external fonts won't load in the sandboxed preview (no network),
+   so the page degrades gracefully to the local fallbacks declared below.
+   In a real browser (downloaded file) the proper fonts load fully. */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=JetBrains+Mono:wght@400;600&family=Orbitron:wght@400;700&display=swap');
+
+:root {
+  /* Backgrounds */
+  --bg-void:      #03030A;
+  --bg-tower:     #080810;
+  --bg-surface:   #0E0E1C;
+  --bg-surface-2: #14142A;
+  --bg-overlay:   rgba(3,3,10,0.85);
+  --grain-opacity: 0.05;
+
+  /* Text */
+  --text-primary:   #E8E8F0;
+  --text-secondary: #8888A0;
+  --text-ghost:     #3A3A55;
+  --text-code:      #A8FFCF;
+
+  /* Extraction Green */
+  --green-apex: #00FFB3;
+  --green-mid:  #00C88A;
+  --green-deep: #007A54;
+  --green-glow: rgba(0,255,179,0.12);
+
+  /* Danger Red */
+  --red-alert: #FF3C5A;
+  --red-mid:   #C82D45;
+  --red-glow:  rgba(255,60,90,0.12);
+
+  /* Rank Purple */
+  --purple-rank: #7B61FF;
+  --purple-mid:  #5C46CC;
+
+  /* Borders */
+  --border-hairline: rgba(232,232,240,0.06);
+  --border-dim:      rgba(232,232,240,0.12);
+  --border-bright:   rgba(232,232,240,0.25);
+  --border-green:    rgba(0,255,179,0.30);
+  --border-red:      rgba(255,60,90,0.30);
+
+  /* Spacing */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-8:32px; --space-10:40px;
+  --space-12:48px; --space-16:64px;
+
+  /* Type scale */
+  --text-xs:11px; --text-sm:13px; --text-base:15px; --text-lg:18px;
+  --text-xl:22px; --text-2xl:28px; --text-3xl:36px; --text-4xl:48px; --text-hero:72px;
+
+  /* Timing */
+  --dur-instant:80ms; --dur-fast:150ms; --dur-normal:300ms;
+  --dur-slow:600ms; --dur-cinematic:1200ms;
+  --ease-out: cubic-bezier(0.16,1,0.3,1);
+  --ease-in:  cubic-bezier(0.7,0,0.84,0);
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  height:100%;
+  background:var(--bg-void);
+  color:var(--text-primary);
+  overflow:hidden;
+  font-family:'IBM Plex Mono','Courier New',monospace;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- Concrete grain overlay (global) ---------- */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:var(--grain-opacity);
+  pointer-events:none;
+  z-index:1000;
+  mix-blend-mode:overlay;
+}
+
+/* Vignette for depth */
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background:radial-gradient(ellipse 80% 70% at 50% 45%, transparent 30%, rgba(3,3,10,0.55) 75%, rgba(3,3,10,0.92) 100%);
+  pointer-events:none;
+  z-index:5;
+}
+
+/* ---------- WebGL canvas (the 3D tower) ---------- */
+#scene {
+  position:fixed; inset:0;
+  width:100%; height:100%;
+  z-index:0;
+  display:block;
+}
+
+/* ---------- CSS fallback tower (only if WebGL fails) ---------- */
+#css-tower {
+  position:fixed; inset:0; z-index:0; display:none;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(0,255,179,0.05), transparent 60%),
+    linear-gradient(to top, #06091a 0%, #03030a 60%);
+  perspective:1400px;
+  overflow:hidden;
+}
+#css-tower .tower-3d {
+  position:absolute; left:50%; bottom:-4%;
+  width:220px; height:130vh;
+  transform:translateX(-50%) rotateX(6deg);
+  background:linear-gradient(to right,#0a0a14 0%,#15152a 20%,#1c1c38 50%,#15152a 80%,#0a0a14 100%);
+  box-shadow:0 0 120px rgba(0,0,0,0.8);
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:6px; padding:14px;
+}
+#css-tower .win {
+  background:#070710;
+  border-radius:1px;
+  height:18px;
+}
+
+/* ---------- Scanline ---------- */
+.scanline {
+  position:fixed; left:0; width:100%; height:2px;
+  background:linear-gradient(transparent, rgba(0,255,179,0.10), transparent);
+  animation:scanline 8s linear infinite;
+  pointer-events:none; z-index:6;
+}
+@keyframes scanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(100vh)} }
+
+/* ---------- Emergency red flicker overlay ---------- */
+#flicker {
+  position:fixed; inset:0; background:rgba(255,60,90,0.15);
+  z-index:8; opacity:0; pointer-events:none;
+}
+
+/* ---------- HUD corners (operations frame) ---------- */
+.hud-corner {
+  position:fixed; width:42px; height:42px; z-index:7; pointer-events:none;
+  border-color:var(--border-dim); border-style:solid; border-width:0;
+}
+.hud-tl { top:24px; left:24px; border-top-width:2px; border-left-width:2px; }
+.hud-tr { top:24px; right:24px; border-top-width:2px; border-right-width:2px; }
+.hud-bl { bottom:24px; left:24px; border-bottom-width:2px; border-left-width:2px; }
+.hud-br { bottom:24px; right:24px; border-bottom-width:2px; border-right-width:2px; }
+
+/* top operations status bar */
+.ops-bar {
+  position:fixed; top:24px; left:50%; transform:translateX(-50%);
+  z-index:7; display:flex; gap:var(--space-6); align-items:center;
+  font-size:var(--text-xs); letter-spacing:0.12em; color:var(--text-ghost);
+  text-transform:uppercase;
+}
+.ops-bar .dot { width:6px; height:6px; border-radius:50%; background:var(--green-apex);
+  box-shadow:0 0 8px var(--green-apex); animation:blink 1.4s infinite; display:inline-block; margin-right:6px; }
+@keyframes blink { 50%{opacity:0.25} }
+
+/* ---------- Main content layer ---------- */
+.stage {
+  position:fixed; inset:0; z-index:10;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:0 24px; text-align:center;
+}
+
+/* Title */
+.title-wrap { position:relative; }
+.apex-title {
+  font-family:'Bebas Neue','Arial Narrow',sans-serif;
+  font-weight:400;
+  font-size:var(--text-hero);
+  line-height:0.92;
+  letter-spacing:0.14em;
+  color:var(--text-primary);
+  margin-bottom:var(--space-2);
+  opacity:0; transform:translateY(14px);
+  text-shadow:0 0 50px rgba(0,0,0,0.9);
+}
+.apex-title .ascent {
+  display:block;
+  font-size:var(--text-xl);
+  letter-spacing:0.6em;
+  color:var(--green-apex);
+  margin-top:var(--space-3);
+  text-shadow:0 0 24px var(--green-glow);
+}
+.apex-title.in { animation:rise 1000ms var(--ease-out) forwards; }
+@keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+/* Status block (typed) */
+.status-block {
+  margin-top:var(--space-6);
+  font-size:var(--text-sm);
+  color:var(--green-apex);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  line-height:1.9;
+  min-height:84px;
+  text-align:center;
+}
+.status-block .timer {
+  font-family:'Orbitron','Bebas Neue',sans-serif;
+  font-size:var(--text-xl);
+  color:var(--red-alert);
+  letter-spacing:0.1em;
+  text-shadow:0 0 16px var(--red-glow);
+}
+.cursor { display:inline-block; width:9px; background:var(--green-apex); animation:cursorBlink 0.7s step-start infinite; }
+@keyframes cursorBlink { 50%{opacity:0} }
+
+/* Flavor text */
+.flavor {
+  margin-top:var(--space-8);
+  max-width:540px;
+  font-size:var(--text-base);
+  color:var(--text-secondary);
+  line-height:2;
+  min-height:230px;
+  white-space:pre-line;
+}
+.flavor .accent { color:var(--text-primary); }
+
+/* CTA buttons */
+.cta-row {
+  margin-top:var(--space-10);
+  display:flex; gap:var(--space-5); align-items:center;
+  opacity:0; transform:translateY(24px);
+}
+.cta-row.in { animation:rise 700ms var(--ease-out) forwards; }
+
+.cta-primary {
+  background:var(--green-apex);
+  color:var(--bg-void);
+  font-family:'Bebas Neue','Arial Narrow',sans-serif;
+  font-size:var(--text-xl);
+  letter-spacing:0.12em;
+  padding:18px 52px;
+  border:none; cursor:pointer;
+  clip-path:polygon(14px 0%,100% 0%,calc(100% - 14px) 100%,0% 100%);
+  transition:transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast);
+  position:relative;
+}
+.cta-primary:hover { transform:translateY(-2px); box-shadow:0 10px 40px rgba(0,255,179,0.4); }
+.cta-primary:active { transform:translateY(0); }
+
+.cta-secondary {
+  background:transparent;
+  color:var(--text-secondary);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:var(--text-sm);
+  padding:18px 34px;
+  border:1px solid var(--border-dim);
+  letter-spacing:0.05em; cursor:pointer;
+  text-transform:uppercase;
+  transition:border-color var(--dur-fast), color var(--dur-fast);
+}
+.cta-secondary:hover { border-color:var(--border-bright); color:var(--text-primary); }
+
+/* ---------- Helicopter beacon (always waiting at top) ---------- */
+.heli-beacon {
+  position:fixed; top:70px; left:50%; transform:translateX(-50%);
+  z-index:9; display:flex; flex-direction:column; align-items:center; gap:6px;
+  opacity:0; transition:opacity 1.2s ease;
+}
+.heli-beacon.in { opacity:0.9; }
+.heli-beacon svg { filter:drop-shadow(0 0 10px var(--green-glow)); }
+.heli-beacon .heli-rotor {
+  transform-box: fill-box;        /* origin relative to rotor's own bounding box */
+  transform-origin: 50% 50%;      /* exact center of the rotor blade -> spins true, clockwise */
+  animation: rotor 0.28s linear infinite;
+}
+@keyframes rotor { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.heli-beacon .lbl {
+  font-size:9px; letter-spacing:0.25em; color:var(--green-apex);
+  text-transform:uppercase; animation:blink 2s infinite;
+}
+
+/* ---------- Side meta rails ---------- */
+.rail {
+  position:fixed; z-index:7; font-size:9px; letter-spacing:0.3em;
+  color:var(--text-ghost); text-transform:uppercase; pointer-events:none;
+}
+.rail-left { left:30px; top:50%; transform:translateY(-50%) rotate(180deg); writing-mode:vertical-rl; }
+.rail-right { right:30px; top:50%; transform:translateY(-50%); writing-mode:vertical-rl; }
+
+/* ---------- HOW IT WORKS modal ---------- */
+.modal-backdrop {
+  position:fixed; inset:0; z-index:2000;
+  background:var(--bg-overlay);
+  backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity var(--dur-normal);
+}
+.modal-backdrop.open { opacity:1; pointer-events:auto; }
+.modal {
+  width:min(720px,92vw); max-height:84vh; overflow-y:auto;
+  background:var(--bg-surface);
+  border:1px solid var(--border-bright);
+  padding:var(--space-10) var(--space-10) var(--space-8);
+  transform:translateY(20px) scale(0.98);
+  transition:transform var(--dur-normal) var(--ease-out);
+  clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px));
+}
+.modal-backdrop.open .modal { transform:translateY(0) scale(1); }
+.modal h2 {
+  font-family:'Bebas Neue','Arial Narrow',sans-serif; font-weight:400;
+  font-size:var(--text-3xl); letter-spacing:0.1em; color:var(--green-apex);
+  margin-bottom:var(--space-2);
+}
+.modal .sub { font-size:var(--text-xs); color:var(--text-ghost); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:var(--space-8); }
+.step {
+  display:flex; gap:var(--space-5); padding:var(--space-4) 0;
+  border-bottom:1px solid var(--border-hairline);
+}
+.step .num {
+  font-family:'Orbitron','Bebas Neue',sans-serif; font-size:var(--text-xl);
+  color:var(--green-deep); min-width:42px;
+}
+.step .body h3 {
+  font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-weight:700;
+  font-size:var(--text-lg); letter-spacing:0.05em; text-transform:uppercase;
+  color:var(--text-primary); margin-bottom:4px;
+}
+.step .body p { font-size:var(--text-sm); color:var(--text-secondary); line-height:1.7; }
+.modal-close {
+  margin-top:var(--space-8); width:100%;
+  background:transparent; border:1px solid var(--border-dim); color:var(--text-secondary);
+  font-family:'IBM Plex Mono',monospace; font-size:var(--text-sm);
+  text-transform:uppercase; letter-spacing:0.1em; padding:14px; cursor:pointer;
+  transition:border-color var(--dur-fast), color var(--dur-fast);
+}
+.modal-close:hover { border-color:var(--green-apex); color:var(--green-apex); }
+
+/* ---------- Elevator transition out ---------- */
+#elevator {
+  position:fixed; inset:0; z-index:3000; pointer-events:none;
+  background:var(--bg-void);
+  transform:scaleY(0); transform-origin:top;
+}
+#elevator.go { animation:elevatorClose 900ms var(--ease-in) forwards; }
+@keyframes elevatorClose { to { transform:scaleY(1); } }
+#elevator-line {
+  position:fixed; left:50%; bottom:0; width:2px; height:0; z-index:3001;
+  transform:translateX(-50%);
+  background:linear-gradient(to top, var(--green-apex), rgba(0,255,179,0));
+  box-shadow:0 0 18px var(--green-apex);
+}
+#elevator-line.go { animation:lineShoot 500ms var(--ease-out) forwards; }
+@keyframes lineShoot { to { height:100vh; } }
+
+/* fade utility used by JS sequence */
+.fade-out { animation:fadeOut 300ms forwards; }
+@keyframes fadeOut { to { opacity:0; } }
+
+/* ============================================================
+   PRE-ROLL CINEMATIC
+   ============================================================ */
+#preroll {
+  position:fixed; inset:0; z-index:5000;
+  background:#000;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+  transition:opacity 800ms var(--ease-out);
+}
+#preroll.gone { opacity:0; pointer-events:none; }
+#prerollVideo, #prerollCanvas {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+}
+#prerollCanvas { display:none; }            /* shown only if video fails */
+#preroll.fallback #prerollVideo { display:none; }
+#preroll.fallback #prerollCanvas { display:block; }
+
+/* cinematic letterbox bars for filmic feel */
+#preroll::before, #preroll::after {
+  content:''; position:absolute; left:0; width:100%;
+  height:7vh; background:#000; z-index:2; pointer-events:none;
+}
+#preroll::before { top:0; }
+#preroll::after  { bottom:0; }
+
+#prerollHud {
+  position:absolute; inset:0; z-index:3; pointer-events:none;
+  padding:calc(7vh + 18px) 28px;
+  display:flex; justify-content:space-between; align-items:flex-start;
+}
+.pr-tag {
+  font-size:var(--text-xs); letter-spacing:0.16em; color:var(--text-secondary);
+  text-transform:uppercase; opacity:0.8;
+}
+.pr-dot {
+  display:inline-block; width:7px; height:7px; border-radius:50%;
+  background:var(--red-alert); box-shadow:0 0 8px var(--red-alert);
+  margin-right:8px; animation:blink 1.2s infinite; vertical-align:middle;
+}
+.pr-skip {
+  pointer-events:auto; cursor:pointer;
+  background:rgba(8,8,16,0.6); border:1px solid var(--border-bright);
+  color:var(--text-primary); font-family:'IBM Plex Mono',monospace;
+  font-size:var(--text-sm); letter-spacing:0.14em; text-transform:uppercase;
+  padding:10px 22px; backdrop-filter:blur(4px);
+  transition:border-color var(--dur-fast), color var(--dur-fast), background var(--dur-fast);
+}
+.pr-skip:hover { border-color:var(--green-apex); color:var(--green-apex); background:rgba(0,255,179,0.08); }
+
+#prerollProgress {
+  position:absolute; left:0; bottom:7vh; width:100%; height:2px;
+  background:rgba(255,255,255,0.08); z-index:3;
+}
+#prerollBar { height:100%; width:0%; background:var(--green-apex);
+  box-shadow:0 0 10px var(--green-glow); transition:width 120ms linear; }
+
+/* ============================================================
+   ENTER-TRANSITION CINEMATIC (after ENTER THE TOWER)
+   A dramatic full-screen ascent burst into the climb.
+   ============================================================ */
+#enterCine {
+  position:fixed; inset:0; z-index:3500; pointer-events:none;
+  background:var(--bg-void);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  opacity:0;
+}
+#enterCine.go { pointer-events:auto; animation:enterCineIn 200ms forwards; }
+@keyframes enterCineIn { to { opacity:1; } }
+
+/* rushing vertical light streaks = elevator acceleration */
+.streaks { position:absolute; inset:0; overflow:hidden; }
+.streak {
+  position:absolute; bottom:-40%; width:2px; height:40%;
+  background:linear-gradient(to top, transparent, var(--green-apex), transparent);
+  opacity:0.0;
+}
+.streak.run { animation:streakUp var(--sd,700ms) linear forwards; }
+@keyframes streakUp {
+  0%   { transform:translateY(0); opacity:0; }
+  10%  { opacity:0.9; }
+  100% { transform:translateY(-260vh); opacity:0; }
+}
+#enterCine .ec-text {
+  font-family:'Bebas Neue','Arial Narrow',sans-serif;
+  font-size:var(--text-4xl); letter-spacing:0.18em; color:var(--green-apex);
+  text-shadow:0 0 30px var(--green-glow);
+  opacity:0; transform:scale(1.3);
+}
+#enterCine .ec-text.show { animation:ecPop 600ms var(--ease-out) forwards; }
+@keyframes ecPop { to { opacity:1; transform:scale(1); } }
+#enterCine .ec-sub {
+  margin-top:14px; font-family:'IBM Plex Mono',monospace; font-size:var(--text-sm);
+  letter-spacing:0.2em; color:var(--text-secondary); text-transform:uppercase;
+  opacity:0;
+}
+#enterCine .ec-sub.show { animation:fadeInUp 600ms var(--ease-out) 300ms forwards; }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+/* white flash at the peak of acceleration */
+#enterFlash { position:fixed; inset:0; z-index:3600; background:#fff; opacity:0; pointer-events:none; }
+#enterFlash.go { animation:whiteFlash 500ms ease-out forwards; }
+@keyframes whiteFlash { 0%{opacity:0} 40%{opacity:0.85} 100%{opacity:0} }
+
+/* ---------- Responsive ---------- */
+@media (max-width:767px) {
+  .apex-title { font-size:54px; }
+  .apex-title .ascent { font-size:var(--text-base); letter-spacing:0.4em; }
+  .flavor { font-size:var(--text-sm); max-width:90vw; }
+  .cta-row { flex-direction:column; width:100%; max-width:320px; }
+  .cta-primary, .cta-secondary { width:100%; text-align:center; }
+  .rail { display:none; }
+  .heli-beacon { top:80px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PRE-ROLL CINEMATIC OVERLAY
+     Real .mp4 video; hand-crafted canvas fallback if it can't play.
+     ============================================================ -->
+<div id="preroll">
+  <video id="prerollVideo" playsinline muted preload="auto" poster="assets/cinematic_poster.jpg">
+    <source src="assets/apex_cinematic.mp4" type="video/mp4" />
+  </video>
+  <!-- canvas fallback cinematic (plays if video fails) -->
+  <canvas id="prerollCanvas"></canvas>
+
+  <div id="prerollHud">
+    <div class="pr-tag"><span class="pr-dot"></span>APEX SECURITY NETWORK // INCOMING TRANSMISSION</div>
+    <button id="skipBtn" class="pr-skip">SKIP&nbsp;&nbsp;&#x25B8;</button>
+  </div>
+  <div id="prerollProgress"><div id="prerollBar"></div></div>
+</div>
+
+<!-- 3D WebGL tower -->
+<canvas id="scene"></canvas>
+
+<!-- CSS fallback tower -->
+<div id="css-tower"><div class="tower-3d" id="cssFloors"></div></div>
+
+<!-- Atmospheric overlays -->
+<div class="scanline"></div>
+<div id="flicker"></div>
+
+<!-- Operations frame -->
+<div class="hud-corner hud-tl"></div>
+<div class="hud-corner hud-tr"></div>
+<div class="hud-corner hud-bl"></div>
+<div class="hud-corner hud-br"></div>
+
+<div class="ops-bar">
+  <span><span class="dot"></span>APEX SECURITY NETWORK</span>
+  <span>SECTOR 7</span>
+  <span>FEED // LIVE</span>
+</div>
+
+<div class="rail rail-left">CLASSIFICATION — TOWER LOCKDOWN PROTOCOL</div>
+<div class="rail rail-right">N 40°42'46" · W 74°00'21" · ALT 0M</div>
+
+<!-- Helicopter beacon at the top — always waiting -->
+<div class="heli-beacon" id="heliBeacon">
+  <svg width="58" height="34" viewBox="0 0 58 34" xmlns="http://www.w3.org/2000/svg">
+    <g class="heli-rotor">
+      <rect x="2" y="6" width="54" height="2" rx="1" fill="#00FFB3"/>
+    </g>
+    <rect x="28" y="7" width="2" height="6" fill="#00C88A"/>
+    <ellipse cx="24" cy="20" rx="15" ry="7" fill="none" stroke="#00FFB3" stroke-width="1.6"/>
+    <path d="M39 18 L53 21 L51 25 L39 23 Z" fill="none" stroke="#00FFB3" stroke-width="1.4"/>
+    <line x1="14" y1="27" x2="34" y2="27" stroke="#00C88A" stroke-width="1.4"/>
+    <line x1="18" y1="26" x2="18" y2="29" stroke="#00C88A" stroke-width="1.2"/>
+    <line x1="30" y1="26" x2="30" y2="29" stroke="#00C88A" stroke-width="1.2"/>
+  </svg>
+  <span class="lbl">Extraction Standby</span>
+</div>
+
+<!-- Main content -->
+<div class="stage" id="stage">
+  <div class="title-wrap">
+    <h1 class="apex-title" id="title">APEX&nbsp;TOWER<span class="ascent">THE ASCENT</span></h1>
+  </div>
+
+  <div class="status-block" id="status"></div>
+
+  <div class="flavor" id="flavor"></div>
+
+  <div class="cta-row" id="ctaRow">
+    <button class="cta-primary" id="enterBtn">ENTER THE TOWER</button>
+    <button class="cta-secondary" id="howBtn">HOW IT WORKS</button>
+  </div>
+</div>
+
+<!-- HOW IT WORKS modal -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <h2>HOW THE TOWER WORKS</h2>
+    <div class="sub">Operational Briefing // Clearance Required</div>
+
+    <div class="step"><div class="num">01</div><div class="body">
+      <h3>The Tower Is A Climb</h3>
+      <p>Ascend floor by floor. Each floor is a challenge that tests how you actually use AI — not whether you can. Progress means going up. Falling behind means staying behind.</p>
+    </div></div>
+
+    <div class="step"><div class="num">02</div><div class="body">
+      <h3>Prompt Budget Is Finite</h3>
+      <p>Every floor grants a limited number of AI prompts. Spend them wisely. Precision beats volume. The system watches how efficiently you extract signal.</p>
+    </div></div>
+
+    <div class="step"><div class="num">03</div><div class="body">
+      <h3>Alliance Or Solo</h3>
+      <p>Mid-climb you'll face a choice: form an alliance to share fragments of the route, or ascend alone. Both paths reach the roof. Only one path keeps its promises.</p>
+    </div></div>
+
+    <div class="step"><div class="num">04</div><div class="body">
+      <h3>The Rooftop Decides</h3>
+      <p>At the summit, only one candidate boards the helicopter and achieves APEX RANK. Answer, confidence, and evidence must all clear threshold. No shortcuts. No guessing.</p>
+    </div></div>
+
+    <button class="modal-close" id="modalClose">CLOSE BRIEFING</button>
+  </div>
+</div>
+
+<!-- Enter-transition cinematic -->
+<div id="enterCine">
+  <div class="streaks" id="streaks"></div>
+  <div class="ec-text" id="ecText">ASCENDING</div>
+  <div class="ec-sub" id="ecSub">TOWER LOCKDOWN // FLOOR 00 → 01</div>
+</div>
+<div id="enterFlash"></div>
+
+<!-- Elevator transition -->
+<div id="elevator"></div>
+<div id="elevator-line"></div>
+
+<!-- ============================================================
+     PRE-ROLL CINEMATIC CONTROLLER
+     Plays the real MP4. If autoplay/network fails, runs a
+     hand-crafted canvas cinematic instead. Always skippable.
+     ============================================================ -->
+<script>
+(function(){
+  const preroll = document.getElementById('preroll');
+  const video   = document.getElementById('prerollVideo');
+  const bar     = document.getElementById('prerollBar');
+  const skipBtn = document.getElementById('skipBtn');
+  let ended = false, usingFallback = false, rafId = null;
+
+  function dismiss(){
+    if (ended) return; ended = true;
+    if (rafId) cancelAnimationFrame(rafId);
+    preroll.classList.add('gone');
+    setTimeout(()=> preroll.style.display='none', 850);
+    // start the home-page intro sequence once cinematic is done
+    if (window.__startHomeIntro) window.__startHomeIntro();
+  }
+
+  skipBtn.addEventListener('click', dismiss);
+  // allow Esc / click-anywhere-on-video to skip
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') dismiss(); });
+  preroll.addEventListener('click', e=>{ if(e.target===video) dismiss(); });
+
+  // progress bar driven by video time (or fallback timer)
+  function tickVideoProgress(){
+    if (ended) return;
+    if (video.duration) bar.style.width = (video.currentTime/video.duration*100)+'%';
+    rafId = requestAnimationFrame(tickVideoProgress);
+  }
+
+  video.addEventListener('ended', dismiss);
+  video.addEventListener('loadeddata', tickVideoProgress);
+
+  // try to play the real video
+  const playPromise = video.play();
+  if (playPromise && playPromise.catch){
+    playPromise.catch(()=> startFallback());
+  }
+  // if the video errors or never loads (no network in sandbox), fall back
+  video.addEventListener('error', startFallback);
+  setTimeout(()=>{ if(!ended && (video.readyState < 2)) startFallback(); }, 2500);
+
+  /* ---------- HAND-CRAFTED CANVAS CINEMATIC (fallback) ----------
+     A condensed ~10s version of the same beats, drawn live so it
+     works with zero network (e.g. inside the sandbox preview).      */
+  function startFallback(){
+    if (usingFallback || ended) return;
+    usingFallback = true;
+    preroll.classList.add('fallback');
+    const cv = document.getElementById('prerollCanvas');
+    const ctx = cv.getContext('2d');
+    function size(){ cv.width = innerWidth; cv.height = innerHeight; }
+    size(); addEventListener('resize', size);
+
+    // window grid
+    const cols=9, rows=80;
+    const win=[];
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+      const k=Math.random();
+      win.push({c,r,kind:k>0.94?1:(k>0.85?2:0),ph:Math.random()*6.28});
+    }
+    const rain=[]; for(let i=0;i<90;i++) rain.push({x:Math.random(),y:Math.random(),l:8+Math.random()*16});
+    const start=performance.now();
+    const DUR=10000;
+
+    function frame(now){
+      if(ended) return;
+      const t=(now-start)/1000;
+      const p=Math.min((now-start)/DUR,1);
+      bar.style.width=(p*100)+'%';
+      const W=cv.width,H=cv.height;
+      // bg
+      const g=ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0,'#01010a'); g.addColorStop(1,'#080a1a');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+      const climb=Math.min(Math.max((t-0.8)/6,0),1);
+      const ease=1-Math.pow(1-climb,3);
+      const cx=W/2, tw=Math.min(W*0.30,340);
+      const tl=cx-tw/2, rowH=Math.max(20,H/26);
+      const baseY=H+40 + ease*(rows*rowH - H*1.25);
+
+      // tower body
+      const tg=ctx.createLinearGradient(tl,0,tl+tw,0);
+      tg.addColorStop(0,'#0a0a14'); tg.addColorStop(0.5,'#1c1c38'); tg.addColorStop(1,'#0a0a14');
+      ctx.fillStyle=tg; ctx.fillRect(tl,0,tw,H);
+      ctx.strokeStyle='rgba(50,50,80,0.7)'; ctx.lineWidth=2;
+      ctx.strokeRect(tl,0,tw,H);
+
+      // windows
+      const cw=tw/cols;
+      win.forEach(w=>{
+        const wy=baseY-w.r*rowH;
+        if(wy<-rowH||wy>H+rowH) return;
+        const wx=tl+w.c*cw+cw*0.18, ww=cw*0.64, wh=rowH*0.55;
+        if(w.kind===1){ const fl=0.55+0.45*Math.sin(t*1.4+w.ph);
+          ctx.fillStyle=`rgba(${239*fl|0},${159*fl|0},${39*fl|0},1)`;
+          ctx.shadowColor='rgba(239,159,39,0.6)'; ctx.shadowBlur=12;
+        } else if(w.kind===2){ ctx.fillStyle='#16203a'; ctx.shadowBlur=0; }
+        else { ctx.fillStyle='#070710'; ctx.shadowBlur=0; }
+        ctx.fillRect(wx,wy,ww,wh); ctx.shadowBlur=0;
+      });
+
+      // rooftop + beacon
+      const roofY=baseY-rows*rowH;
+      const roofVis=Math.min(Math.max((climb-0.6)/0.4,0),1);
+      if(roofVis>0){
+        ctx.fillStyle=`rgba(40,42,60,${roofVis})`;
+        ctx.fillRect(tl-8,roofY,tw+16,14);
+        const pulse=0.5+0.5*Math.sin(t*3);
+        // mast
+        ctx.strokeStyle='rgba(40,44,64,1)'; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.moveTo(cx,roofY); ctx.lineTo(cx,roofY-70); ctx.stroke();
+        // helipad ring
+        ctx.strokeStyle=`rgba(0,255,179,${(0.4+0.6*pulse)*roofVis})`; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.ellipse(cx,roofY-26,46,18,0,0,Math.PI*2); ctx.stroke();
+        // beacon glow
+        ctx.shadowColor='#00ffb3'; ctx.shadowBlur=30*roofVis;
+        ctx.fillStyle=`rgba(0,255,179,${roofVis})`;
+        ctx.beginPath(); ctx.arc(cx,roofY-70,6+4*pulse,0,Math.PI*2); ctx.fill();
+        ctx.shadowBlur=0;
+        // helicopter (late)
+        const hi=Math.min(Math.max((t-7)/2,0),1);
+        if(hi>0){ const hx=cx+ (160-90*hi), hy=roofY-140+8*Math.sin(t*2);
+          ctx.strokeStyle=`rgba(180,200,220,${hi})`; ctx.lineWidth=2;
+          ctx.beginPath(); ctx.ellipse(hx,hy,24,9,0,0,Math.PI*2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(hx+18,hy); ctx.lineTo(hx+60,hy); ctx.stroke();
+          const rw=50+16*Math.sin(t*30);
+          ctx.strokeStyle='#00ffb3';
+          ctx.beginPath(); ctx.moveTo(hx-rw,hy-15); ctx.lineTo(hx+rw,hy-15); ctx.stroke();
+        }
+      }
+
+      // rain
+      ctx.strokeStyle='rgba(80,100,170,'+(0.4*climb)+')'; ctx.lineWidth=1;
+      rain.forEach(r=>{ const y=(r.y*H+(t*300))%H; ctx.beginPath();
+        ctx.moveTo(r.x*W,y); ctx.lineTo(r.x*W-r.l*0.4,y+r.l); ctx.stroke(); });
+
+      // red flicker
+      if((t>0.6&&t<0.72)||(t>0.9&&t<0.97)){ ctx.fillStyle='rgba(255,60,90,0.28)'; ctx.fillRect(0,0,W,H); }
+
+      // status text
+      if(t>3.2){
+        ctx.font='600 22px monospace'; ctx.fillStyle='#00ffb3';
+        ctx.fillText('STATUS: LOCKDOWN ACTIVE', 40, H-90);
+        const rem=Math.max(0,3600-Math.floor((t-3.5)*120));
+        ctx.fillStyle='#8888a0';
+        ctx.fillText('EXTRACTION WINDOW: ',40,H-58);
+        const bw=ctx.measureText('EXTRACTION WINDOW: ').width;
+        ctx.fillStyle='#ff3c5a';
+        ctx.fillText(`${String(rem/60|0).padStart(2,'0')}:${String(rem%60).padStart(2,'0')}`,40+bw,H-58);
+      }
+
+      // title slam
+      if(t>8.4){
+        const ti=Math.min((t-8.4)/0.6,1);
+        ctx.fillStyle=`rgba(3,3,10,${0.45*ti})`; ctx.fillRect(0,0,W,H);
+        ctx.textAlign='center';
+        ctx.font='400 '+Math.min(W*0.075,96)+'px "Bebas Neue","Arial Narrow",sans-serif';
+        ctx.fillStyle=`rgba(232,232,240,${ti})`;
+        ctx.fillText('APEX TOWER', cx, H*0.46);
+        if(t>8.9){ ctx.font='400 28px monospace';
+          ctx.fillStyle='#00ffb3'; ctx.fillText('T H E   A S C E N T', cx, H*0.55); }
+        ctx.textAlign='left';
+      }
+
+      // scanline + grain
+      const sy=(t*90)%H;
+      ctx.fillStyle='rgba(0,40,28,1)'; ctx.fillRect(0,sy,W,2);
+
+      if(p>=1){ dismiss(); return; }
+      rafId=requestAnimationFrame(frame);
+    }
+    rafId=requestAnimationFrame(frame);
+  }
+})();
+</script>
+
+<!-- Three.js (loaded from CDN; works in downloaded file & most previews) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ============================================================
+   3D REALISTIC TOWER — Three.js scene
+   A near-future concrete skyscraper in lockdown:
+   - extruded tower block with thousands of window cells
+   - a few amber-lit windows (life still inside)
+   - one cold extraction-green beacon at the rooftop
+   - slow cinematic camera drift + volumetric fog
+   ============================================================ */
+(function () {
+  const canvas = document.getElementById('scene');
+  let renderer, scene, camera, tower, beaconLight, beaconMesh, raining, rainPoints;
+  let amberWindows = [];
+  let webglOK = true;
+
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
+  } catch (e) { webglOK = false; }
+
+  if (!window.THREE || !webglOK) { return enableCssFallback(); }
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x03030a, 1);
+
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x05050f, 0.018);
+
+  camera = new THREE.PerspectiveCamera(48, window.innerWidth/window.innerHeight, 0.1, 600);
+  camera.position.set(0, 6, 60);
+  camera.lookAt(0, 22, 0);
+
+  // ---------- Lighting (emergency / cold) ----------
+  const ambient = new THREE.AmbientLight(0x223044, 0.55);
+  scene.add(ambient);
+
+  const key = new THREE.DirectionalLight(0x4a5a8a, 0.9);
+  key.position.set(-30, 60, 40);
+  scene.add(key);
+
+  const rim = new THREE.DirectionalLight(0x00ffb3, 0.25);
+  rim.position.set(40, 30, -30);
+  scene.add(rim);
+
+  const redEmergency = new THREE.PointLight(0xff3c5a, 0.0, 120);
+  redEmergency.position.set(0, 18, 30);
+  scene.add(redEmergency);
+
+  // ---------- The Tower (concrete block) ----------
+  const towerGroup = new THREE.Group();
+  scene.add(towerGroup);
+
+  const TW = 16, TD = 16, TH = 86; // width, depth, height
+  const concrete = new THREE.MeshStandardMaterial({
+    color: 0x14141f, roughness: 0.95, metalness: 0.08
+  });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(TW, TH, TD), concrete);
+  body.position.y = TH/2;
+  towerGroup.add(body);
+
+  // subtle edge frame
+  const edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(body.geometry),
+    new THREE.LineBasicMaterial({ color:0x2a2a44, transparent:true, opacity:0.6 })
+  );
+  edges.position.copy(body.position);
+  towerGroup.add(edges);
+
+  // ---------- Windows via instanced grid ----------
+  const cols = 7, rows = 34;
+  const winW = 1.35, winH = 1.5, gapX = TW/cols, gapY = (TH-4)/rows;
+  const winGeo = new THREE.PlaneGeometry(winW, winH);
+
+  const matDark  = new THREE.MeshBasicMaterial({ color:0x070710 });
+  const matAmber = new THREE.MeshBasicMaterial({ color:0xef9f27 });
+  const matBlue  = new THREE.MeshBasicMaterial({ color:0x16203a });
+
+  // place windows on the four faces
+  const faces = [
+    { axis:'z', sign:1,  rot:[0,0,0] },
+    { axis:'z', sign:-1, rot:[0,Math.PI,0] },
+    { axis:'x', sign:1,  rot:[0,Math.PI/2,0] },
+    { axis:'x', sign:-1, rot:[0,-Math.PI/2,0] },
+  ];
+
+  faces.forEach(f => {
+    for (let r=0; r<rows; r++) {
+      for (let c=0; c<cols; c++) {
+        const roll = Math.random();
+        let mat = matDark;
+        if (roll > 0.965) mat = matAmber;
+        else if (roll > 0.86) mat = matBlue;
+        const m = new THREE.Mesh(winGeo, mat);
+        const x = (c - (cols-1)/2) * gapX;
+        const y = 2.5 + r * gapY;
+        const off = (f.axis==='z'? TD/2 : TW/2) + 0.05;
+        if (f.axis==='z') { m.position.set(x, y, f.sign*off); }
+        else              { m.position.set(f.sign*off, y, x); }
+        m.rotation.set(f.rot[0], f.rot[1], f.rot[2]);
+        if (mat === matAmber) amberWindows.push({ mesh:m, phase:Math.random()*6.28, base:0.85 });
+        towerGroup.add(m);
+      }
+    }
+  });
+
+  // ---------- Antenna mast ----------
+  const mast = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.12,0.18,16,8),
+    new THREE.MeshStandardMaterial({color:0x2a2a3a, roughness:0.7})
+  );
+  mast.position.y = TH + 8;
+  towerGroup.add(mast);
+
+  // ---------- Rooftop extraction beacon (green, blinking) ----------
+  const beaconGeo = new THREE.SphereGeometry(0.7, 16, 16);
+  beaconMesh = new THREE.Mesh(beaconGeo, new THREE.MeshBasicMaterial({ color:0x00ffb3 }));
+  beaconMesh.position.set(0, TH + 1.4, 0);
+  towerGroup.add(beaconMesh);
+
+  beaconLight = new THREE.PointLight(0x00ffb3, 2.2, 60);
+  beaconLight.position.set(0, TH + 1.4, 0);
+  towerGroup.add(beaconLight);
+
+  // helipad ring
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(2.6, 3.4, 32),
+    new THREE.MeshBasicMaterial({ color:0x00c88a, side:THREE.DoubleSide, transparent:true, opacity:0.5 })
+  );
+  ring.rotation.x = -Math.PI/2;
+  ring.position.y = TH + 0.2;
+  towerGroup.add(ring);
+
+  // ---------- Ground glow plane ----------
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(400,400),
+    new THREE.MeshStandardMaterial({ color:0x04040c, roughness:1 })
+  );
+  ground.rotation.x = -Math.PI/2;
+  ground.position.y = 0;
+  scene.add(ground);
+
+  // ---------- Distant skyline silhouettes ----------
+  const sky = new THREE.Group();
+  for (let i=0;i<22;i++){
+    const w = 4+Math.random()*7, h=20+Math.random()*60, d=4+Math.random()*7;
+    const b = new THREE.Mesh(new THREE.BoxGeometry(w,h,d),
+      new THREE.MeshStandardMaterial({color:0x0a0a16, roughness:1}));
+    const ang = (i/22)*Math.PI*2;
+    const rad = 70+Math.random()*60;
+    b.position.set(Math.cos(ang)*rad, h/2, Math.sin(ang)*rad - 30);
+    sky.add(b);
+  }
+  scene.add(sky);
+
+  // ---------- Atmospheric particles (fine rain / dust) ----------
+  const pCount = 900;
+  const pGeo = new THREE.BufferGeometry();
+  const pos = new Float32Array(pCount*3);
+  for (let i=0;i<pCount;i++){
+    pos[i*3]   = (Math.random()-0.5)*120;
+    pos[i*3+1] = Math.random()*120;
+    pos[i*3+2] = (Math.random()-0.5)*120 + 10;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  rainPoints = new THREE.Points(pGeo, new THREE.PointsMaterial({
+    color:0x3a4a7a, size:0.18, transparent:true, opacity:0.5
+  }));
+  scene.add(rainPoints);
+
+  // ---------- Interaction: subtle parallax ----------
+  let mx=0,my=0,tmx=0,tmy=0;
+  window.addEventListener('pointermove', e=>{
+    tmx = (e.clientX/window.innerWidth - 0.5);
+    tmy = (e.clientY/window.innerHeight - 0.5);
+  });
+
+  // ---------- Animation loop ----------
+  const clock = new THREE.Clock();
+  let camStart = performance.now();
+  function animate(){
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+    const intro = Math.min((performance.now()-camStart)/4500, 1); // 0->1 cinematic ascent
+    const eIntro = 1 - Math.pow(1-intro, 3);
+
+    // camera cinematic rise + slow orbit
+    mx += (tmx-mx)*0.04; my += (tmy-my)*0.04;
+    const orbit = t*0.045;
+    const radius = 64 - eIntro*4;
+    camera.position.x = Math.sin(orbit)*radius + mx*8;
+    camera.position.z = Math.cos(orbit)*radius;
+    camera.position.y = 4 + eIntro*30 + my*6;
+    camera.lookAt(0, 18 + eIntro*22, 0);
+
+    // beacon blink
+    const blink = (Math.sin(t*3.2)*0.5+0.5);
+    beaconLight.intensity = 1.0 + blink*2.4;
+    beaconMesh.material.color.setRGB(0, 0.6+blink*0.4, 0.45+blink*0.25);
+    ring.material.opacity = 0.3 + blink*0.4;
+
+    // amber windows flicker (life inside)
+    amberWindows.forEach(w=>{
+      const f = 0.7 + Math.sin(t*1.3 + w.phase)*0.3;
+      w.mesh.material.color.setRGB(0.93*f, 0.62*f, 0.15*f);
+    });
+
+    // rain fall
+    const arr = rainPoints.geometry.attributes.position.array;
+    for(let i=0;i<pCount;i++){
+      arr[i*3+1] -= 0.35;
+      if(arr[i*3+1]<0) arr[i*3+1]=120;
+    }
+    rainPoints.geometry.attributes.position.needsUpdate = true;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // emergency red flicker tied to scene light too
+  window.__redFlash = function(){
+    redEmergency.intensity = 6;
+    setTimeout(()=>{ redEmergency.intensity = 0; }, 60);
+  };
+
+  // resize
+  window.addEventListener('resize', ()=>{
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  function enableCssFallback(){
+    document.getElementById('scene').style.display='none';
+    const ct = document.getElementById('css-tower');
+    ct.style.display='block';
+    const grid = document.getElementById('cssFloors');
+    let html='';
+    for(let i=0;i<360;i++){
+      const r = Math.random();
+      const c = r>0.96 ? '#ef9f27' : (r>0.9 ? '#16203a' : '#070710');
+      const glow = r>0.96 ? 'box-shadow:0 0 6px rgba(239,159,39,0.6)' : '';
+      html += `<div class="win" style="background:${c};${glow}"></div>`;
+    }
+    grid.innerHTML = html;
+  }
+})();
+
+/* ============================================================
+   CINEMATIC INTRO SEQUENCE (timeline from the spec)
+   ============================================================ */
+(function(){
+  const title   = document.getElementById('title');
+  const status  = document.getElementById('status');
+  const flavor  = document.getElementById('flavor');
+  const ctaRow  = document.getElementById('ctaRow');
+  const flicker = document.getElementById('flicker');
+  const heli    = document.getElementById('heliBeacon');
+
+  function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+  function flash(dur){
+    flicker.style.transition = 'none';
+    flicker.style.opacity = '1';
+    if (window.__redFlash) window.__redFlash();
+    setTimeout(()=>{ flicker.style.transition='opacity 120ms'; flicker.style.opacity='0'; }, dur);
+  }
+
+  // typewriter that supports inline html via token list
+  function typeInto(el, text, speed, opts={}){
+    return new Promise(resolve=>{
+      el.innerHTML = (opts.prefix||'');
+      let i=0;
+      const cursor = opts.cursor !== false;
+      function step(){
+        if(i<=text.length){
+          el.innerHTML = (opts.prefix||'') + text.slice(0,i) + (cursor?'<span class="cursor">&nbsp;</span>':'');
+          i++;
+          setTimeout(step, speed);
+        } else {
+          el.innerHTML = (opts.prefix||'') + text;
+          resolve();
+        }
+      }
+      step();
+    });
+  }
+
+  // LIVE countdown timer (extraction window)
+  let secs = 60*60;
+  let timerEl = null;
+  function fmt(s){
+    const m=String(Math.floor(s/60)).padStart(2,'0');
+    const ss=String(s%60).padStart(2,'0');
+    return m+':'+ss;
+  }
+  function tickTimer(){
+    if(!timerEl) return;
+    secs = Math.max(0, secs-1);
+    timerEl.textContent = fmt(secs);
+    setTimeout(tickTimer,1000);
+  }
+
+  async function run(){
+    title.classList.add('in');                 // tower title fades in
+    heli.classList.add('in');                  // helicopter beacon appears
+
+    await wait(1200);
+    flash(50);                                 // emergency flicker once
+    await wait(400);
+    flash(50); await wait(120); flash(50);     // twice fast
+
+    await wait(600);
+    // status block types in
+    status.innerHTML = '';
+    await typeInto(status, 'STATUS: LOCKDOWN ACTIVE', 26, {cursor:false});
+    status.innerHTML = 'STATUS: LOCKDOWN ACTIVE<br>';
+    const line2 = document.createElement('span');
+    status.appendChild(line2);
+    await typeInto(line2, 'EXTRACTION WINDOW: ', 24, {cursor:false});
+    const tspan = document.createElement('span');
+    tspan.className='timer'; tspan.textContent='60:00';
+    line2.appendChild(tspan);
+    timerEl = tspan;
+    tickTimer();
+
+    await wait(700);
+    // flavor text
+    const flavorText =
+`Every year,
+thousands enter the Tower.
+
+Very few reach the top.
+
+Everyone claims they can use AI.
+
+The Tower decides who actually can.`;
+    await typeFlavor(flavor, flavorText, 16);
+
+    await wait(400);
+    ctaRow.classList.add('in');                // buttons materialize
+  }
+
+  function typeFlavor(el, text, speed){
+    return new Promise(resolve=>{
+      el.textContent='';
+      let i=0;
+      function step(){
+        if(i<=text.length){
+          el.textContent = text.slice(0,i);
+          i++;
+          setTimeout(step, speed);
+        } else { resolve(); }
+      }
+      step();
+    });
+  }
+
+  // Don't auto-run; wait for the pre-roll cinematic to finish (or be skipped).
+  // The pre-roll controller calls window.__startHomeIntro when it dismisses.
+  window.__startHomeIntro = run;
+
+  /* ---------- HOW IT WORKS modal ---------- */
+  const modal = document.getElementById('modal');
+  document.getElementById('howBtn').addEventListener('click', ()=> modal.classList.add('open'));
+  document.getElementById('modalClose').addEventListener('click', ()=> modal.classList.remove('open'));
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.classList.remove('open'); });
+
+  /* ---------- ENTER THE TOWER — cinematic ascent transition ---------- */
+  document.getElementById('enterBtn').addEventListener('click', ()=>{
+    const stage   = document.getElementById('stage');
+    const cine    = document.getElementById('enterCine');
+    const streaks = document.getElementById('streaks');
+    const ecText  = document.getElementById('ecText');
+    const ecSub   = document.getElementById('ecSub');
+    const flash   = document.getElementById('enterFlash');
+
+    // 1) fade the home UI
+    stage.classList.add('fade-out');
+
+    // 2) launch the cinematic ascent overlay
+    setTimeout(()=>{
+      cine.classList.add('go');
+
+      // spawn rushing elevator light streaks (accelerating)
+      const N = 46;
+      for (let i=0;i<N;i++){
+        const s = document.createElement('div');
+        s.className = 'streak';
+        s.style.left = (Math.random()*100) + 'vw';
+        const dur = 500 + Math.random()*700;
+        s.style.setProperty('--sd', dur + 'ms');
+        s.style.opacity = 0.3 + Math.random()*0.7;
+        streaks.appendChild(s);
+        setTimeout(()=> s.classList.add('run'), Math.random()*900);
+        setTimeout(()=> s.remove(), dur + 1000);
+      }
+
+      // 3) dramatic text beats
+      setTimeout(()=> ecText.classList.add('show'), 250);
+      setTimeout(()=> ecSub.classList.add('show'), 250);
+      setTimeout(()=> { ecText.textContent = 'FLOOR 01'; }, 1600);
+
+      // 4) peak white flash = arrival
+      setTimeout(()=> flash.classList.add('go'), 2100);
+
+      // 5) wipe to black (elevator doors) + navigate hook
+      setTimeout(()=>{
+        document.getElementById('elevator-line').classList.add('go');
+      }, 2300);
+      setTimeout(()=>{
+        document.getElementById('elevator').classList.add('go');
+      }, 2700);
+      setTimeout(()=>{
+        // hook for navigation into the climb:
+        // window.location.href = 'tutorial.html';
+      }, 3600);
+    }, 300);
+  });
+})();
+</script>
+</body>
+</html>

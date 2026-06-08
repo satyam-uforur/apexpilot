@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>APEXRANK · THE ASCENT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=JetBrains+Mono:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg-void: #03030A;
+  --bg-tower: #080810;
+  --bg-surface: #0E0E1C;
+  --bg-surface-2: #14142A;
+  --bg-overlay: rgba(3,3,10,0.85);
+  --grain-opacity: 0.05;
+  --text-primary: #E8E8F0;
+  --text-secondary: #8888A0;
+  --text-ghost: #3A3A55;
+  --text-code: #A8FFCF;
+  --green-apex: #00FFB3;
+  --green-mid: #00C88A;
+  --green-deep: #007A54;
+  --green-glow: rgba(0,255,179,0.12);
+  --red-alert: #FF3C5A;
+  --red-mid: #C82D45;
+  --red-glow: rgba(255,60,90,0.12);
+  --purple-rank: #7B61FF;
+  --purple-mid: #5C46CC;
+  --border-hairline: rgba(232,232,240,0.06);
+  --border-dim: rgba(232,232,240,0.12);
+  --border-bright: rgba(232,232,240,0.25);
+  --border-green: rgba(0,255,179,0.30);
+  --border-red: rgba(255,60,90,0.30);
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-8:32px; --space-10:40px;
+  --space-12:48px; --space-16:64px;
+  --text-xs:11px; --text-sm:13px; --text-base:15px; --text-lg:18px;
+  --text-xl:22px; --text-2xl:28px; --text-3xl:36px; --text-4xl:48px; --text-hero:72px;
+  --dur-instant:80ms; --dur-fast:150ms; --dur-normal:300ms;
+  --dur-slow:600ms; --dur-cinematic:1200ms;
+  --ease-out: cubic-bezier(0.16,1,0.3,1);
+  --ease-in: cubic-bezier(0.7,0,0.84,0);
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+  height:100%; background:var(--bg-void); color:var(--text-primary);
+  overflow:hidden; font-family:'IBM Plex Mono','Courier New',monospace;
+  -webkit-font-smoothing:antialiased;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:var(--grain-opacity); pointer-events:none; z-index:3; mix-blend-mode:overlay;
+}
+body::after {
+  content:''; position:fixed; inset:0;
+  background:radial-gradient(ellipse 80% 70% at 50% 45%, transparent 30%, rgba(3,3,10,0.55) 75%, rgba(3,3,10,0.92) 100%);
+  pointer-events:none; z-index:3;
+}
+#scene { position:fixed; inset:0; width:100%; height:100%; z-index:0; display:block; }
+#css-tower { position:fixed; inset:0; z-index:0; display:none;
+  background: radial-gradient(ellipse 60% 40% at 50% 100%, rgba(0,255,179,0.05), transparent 60%),
+              linear-gradient(to top, #06091a 0%, #03030a 60%);
+  perspective:1400px; overflow:hidden;
+}
+#css-tower .tower-3d { position:absolute; left:50%; bottom:-4%; width:220px; height:130vh;
+  transform:translateX(-50%) rotateX(6deg);
+  background:linear-gradient(to right,#0a0a14 0%,#15152a 20%,#1c1c38 50%,#15152a 80%,#0a0a14 100%);
+  box-shadow:0 0 120px rgba(0,0,0,0.8); display:grid; grid-template-columns:repeat(6,1fr);
+  gap:6px; padding:14px;
+}
+#css-tower .win { background:#070710; border-radius:1px; height:18px; }
+
+/* Pre-roll video - covers everything */
+#preroll { position:fixed; inset:0; z-index:100; background:#000; display:flex; align-items:center; justify-content:center; }
+#preroll video { width:100%; height:100%; object-fit:cover; }
+#skipBtn { position:absolute; bottom:30px; right:30px; z-index:101;
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15);
+  color:rgba(255,255,255,0.5); font-family:'IBM Plex Mono',monospace;
+  font-size:0.75rem; letter-spacing:0.14em; text-transform:uppercase;
+  padding:10px 22px; cursor:pointer; transition:all 0.2s; }
+#skipBtn:hover { border-color:var(--green-apex); color:var(--green-apex); background:rgba(0,255,179,0.08); }
+
+/* Atmospheric overlays */
+.scanline { position:fixed; left:0; width:100%; height:2px;
+  background:linear-gradient(transparent, rgba(0,255,179,0.10), transparent);
+  animation:scanline 8s linear infinite; pointer-events:none; z-index:4; }
+@keyframes scanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(100vh)} }
+#flicker { position:fixed; inset:0; background:rgba(100,180,255,0.25); z-index:5; opacity:0; pointer-events:none; }
+.hud-corner { position:fixed; width:42px; height:42px; z-index:4; pointer-events:none;
+  border-color:var(--border-dim); border-style:solid; border-width:0; }
+.hud-tl { top:24px; left:24px; border-top-width:2px; border-left-width:2px; }
+.hud-tr { top:24px; right:24px; border-top-width:2px; border-right-width:2px; }
+.hud-bl { bottom:24px; left:24px; border-bottom-width:2px; border-left-width:2px; }
+.hud-br { bottom:24px; right:24px; border-bottom-width:2px; border-right-width:2px; }
+.ops-bar { position:fixed; top:24px; left:50%; transform:translateX(-50%); z-index:4;
+  display:flex; gap:var(--space-6); align-items:center; font-size:var(--text-xs);
+  letter-spacing:0.12em; color:var(--text-ghost); text-transform:uppercase; }
+.ops-bar .dot { width:6px; height:6px; border-radius:50%; background:var(--green-apex);
+  box-shadow:0 0 8px var(--green-apex); animation:blink 1.4s infinite; display:inline-block; margin-right:6px; }
+@keyframes blink { 50%{opacity:0.25} }
+.rail { position:fixed; z-index:4; font-size:9px; letter-spacing:0.3em;
+  color:var(--text-ghost); text-transform:uppercase; pointer-events:none; }
+.rail-left { left:30px; top:50%; transform:translateY(-50%) rotate(180deg); writing-mode:vertical-rl; }
+.rail-right { right:30px; top:50%; transform:translateY(-50%); writing-mode:vertical-rl; }
+.heli-beacon { position:fixed; top:70px; left:50%; transform:translateX(-50%); z-index:4;
+  display:flex; flex-direction:column; align-items:center; gap:6px; opacity:0; transition:opacity 1.2s ease; }
+.heli-beacon svg { filter:drop-shadow(0 0 10px var(--green-glow)); }
+.heli-beacon .heli-rotor { transform-box: fill-box; transform-origin: 50% 50%; animation: rotor 0.28s linear infinite; }
+@keyframes rotor { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.heli-beacon .lbl { font-size:9px; letter-spacing:0.25em; color:var(--green-apex);
+  text-transform:uppercase; animation:blink 2s infinite; }
+
+/* React root — hidden initially */
+#root { position:fixed; inset:0; z-index:70; display:none; }
+
+@keyframes rootFadeIn { from{opacity:0} to{opacity:1} }
+
+@media (max-width:767px) {
+  .rail { display:none; }
+  .heli-beacon { top:80px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Three.js 3D tower background -->
+<canvas id="scene"></canvas>
+<div id="css-tower"><div class="tower-3d" id="cssFloors"></div></div>
+
+<!-- Atmospheric overlays -->
+<div class="scanline"></div>
+<div id="flicker"></div>
+<div class="hud-corner hud-tl"></div>
+<div class="hud-corner hud-tr"></div>
+<div class="hud-corner hud-bl"></div>
+<div class="hud-corner hud-br"></div>
+<div class="ops-bar"><span><span class="dot"></span>APEX SECURITY NETWORK</span><span>SECTOR 7</span><span>FEED // LIVE</span></div>
+<div class="rail rail-left">CLASSIFICATION — TOWER LOCKDOWN PROTOCOL</div>
+<div class="rail rail-right">N 40°42'46" · W 74°00'21" · ALT 0M</div>
+
+<!-- Pre-roll video -->
+<div id="preroll">
+  <video id="prerollVideo" autoplay muted playsInline>
+    <source src="/sa.mp4" type="video/mp4" />
+  </video>
+  <button id="skipBtn">SKIP INTRO</button>
+</div>
+
+<!-- START GAME button (shown after video on 3D building) -->
+<button id="startGameBtn" style="display:none; position:fixed; z-index:15; left:50%; bottom:100px; transform:translateX(-50%);
+  background:var(--green-apex); color:var(--bg-void);
+  font-family:'Bebas Neue','Arial Narrow',sans-serif; font-size:var(--text-xl);
+  letter-spacing:0.12em; padding:18px 52px; border:none; cursor:pointer;
+  clip-path:polygon(14px 0%,100% 0%,calc(100% - 14px) 100%,0% 100%);
+  transition:transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast);"
+  onmouseover="this.style.transform='translateX(-50%) translateY(-2px)'; this.style.boxShadow='0 10px 40px rgba(0,255,179,0.4)';"
+  onmouseout="this.style.transform='translateX(-50%)'; this.style.boxShadow='none';">
+  START GAME
+</button>
+
+<!-- React root (hidden until START GAME clicked) -->
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script type="module" src="/src/main.jsx"></script>
+
+<script>
+/* ===== THREE.JS 3D TOWER (called after video ends) ===== */
+var towerRunning = false;
+function initTower() {
+  if (towerRunning) return;
+  towerRunning = true;
+  const canvas = document.getElementById('scene');
+  var renderer, scene, camera, beaconLight, beaconMesh, rainPoints;
+  var amberWindows = [];
+  var webglOK = true;
+
+  try { renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false }); }
+  catch (e) { webglOK = false; }
+
+  if (!window.THREE || !webglOK) {
+    document.getElementById('scene').style.display = 'none';
+    var ct = document.getElementById('css-tower');
+    ct.style.display = 'block';
+    var grid = document.getElementById('cssFloors');
+    var html = '';
+    for (var i = 0; i < 360; i++) {
+      var r = Math.random();
+      var c = r > 0.96 ? '#ef9f27' : (r > 0.9 ? '#16203a' : '#070710');
+      var glow = r > 0.96 ? 'box-shadow:0 0 6px rgba(239,159,39,0.6)' : '';
+      html += '<div class="win" style="background:' + c + ';' + glow + '"></div>';
+    }
+    grid.innerHTML = html;
+    return;
+  }
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x03030a, 1);
+
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x05050f, 0.018);
+
+  camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 600);
+  camera.position.set(0, 6, 60);
+  camera.lookAt(0, 22, 0);
+
+  var ambient = new THREE.AmbientLight(0x223044, 0.55);
+  scene.add(ambient);
+  var key = new THREE.DirectionalLight(0x4a5a8a, 0.9);
+  key.position.set(-30, 60, 40);
+  scene.add(key);
+  var rim = new THREE.DirectionalLight(0x00ffb3, 0.25);
+  rim.position.set(40, 30, -30);
+  scene.add(rim);
+  var blueEmergency = new THREE.PointLight(0x88ccff, 0.0, 150);
+  blueEmergency.position.set(0, 18, 30);
+  scene.add(blueEmergency);
+
+  var towerGroup = new THREE.Group();
+  scene.add(towerGroup);
+  var TW = 16, TD = 16, TH = 86;
+  var concrete = new THREE.MeshStandardMaterial({ color: 0x14141f, roughness: 0.95, metalness: 0.08 });
+  var body = new THREE.Mesh(new THREE.BoxGeometry(TW, TH, TD), concrete);
+  body.position.y = TH / 2;
+  towerGroup.add(body);
+  var edges = new THREE.LineSegments(
+    new THREE.EdgesGeometry(body.geometry),
+    new THREE.LineBasicMaterial({ color: 0x2a2a44, transparent: true, opacity: 0.6 })
+  );
+  edges.position.copy(body.position);
+  towerGroup.add(edges);
+
+  var cols = 7, rows = 34;
+  var winW = 1.35, winH = 1.5, gapX = TW / cols, gapY = (TH - 4) / rows;
+  var winGeo = new THREE.PlaneGeometry(winW, winH);
+  var matDark = new THREE.MeshBasicMaterial({ color: 0x070710 });
+  var matAmber = new THREE.MeshBasicMaterial({ color: 0xef9f27 });
+  var matBlue = new THREE.MeshBasicMaterial({ color: 0x16203a });
+  var faces = [
+    { axis: 'z', sign: 1, rot: [0, 0, 0] },
+    { axis: 'z', sign: -1, rot: [0, Math.PI, 0] },
+    { axis: 'x', sign: 1, rot: [0, Math.PI / 2, 0] },
+    { axis: 'x', sign: -1, rot: [0, -Math.PI / 2, 0] },
+  ];
+  faces.forEach(function(f) {
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var roll = Math.random();
+        var mat = matDark;
+        if (roll > 0.965) mat = matAmber;
+        else if (roll > 0.86) mat = matBlue;
+        var m = new THREE.Mesh(winGeo, mat);
+        var x = (c - (cols - 1) / 2) * gapX;
+        var y = 2.5 + r * gapY;
+        var off = (f.axis === 'z' ? TD / 2 : TW / 2) + 0.05;
+        if (f.axis === 'z') m.position.set(x, y, f.sign * off);
+        else m.position.set(f.sign * off, y, x);
+        m.rotation.set(f.rot[0], f.rot[1], f.rot[2]);
+        if (mat === matAmber) amberWindows.push({ mesh: m, phase: Math.random() * 6.28, base: 0.85 });
+        towerGroup.add(m);
+      }
+    }
+  });
+
+  var mast = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.12, 0.18, 16, 8),
+    new THREE.MeshStandardMaterial({ color: 0x2a2a3a, roughness: 0.7 })
+  );
+  mast.position.y = TH + 8;
+  towerGroup.add(mast);
+
+  beaconMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.7, 16, 16),
+    new THREE.MeshBasicMaterial({ color: 0x00ffb3 })
+  );
+  beaconMesh.position.set(0, TH + 1.4, 0);
+  towerGroup.add(beaconMesh);
+  beaconLight = new THREE.PointLight(0x00ffb3, 2.2, 60);
+  beaconLight.position.set(0, TH + 1.4, 0);
+  towerGroup.add(beaconLight);
+
+  var ring = new THREE.Mesh(
+    new THREE.RingGeometry(2.6, 3.4, 32),
+    new THREE.MeshBasicMaterial({ color: 0x00c88a, side: THREE.DoubleSide, transparent: true, opacity: 0.5 })
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = TH + 0.2;
+  towerGroup.add(ring);
+
+  var pCount = 900;
+  var pGeo = new THREE.BufferGeometry();
+  var pos = new Float32Array(pCount * 3);
+  for (var i = 0; i < pCount; i++) {
+    pos[i * 3] = (Math.random() - 0.5) * 120;
+    pos[i * 3 + 1] = Math.random() * 120;
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 120 + 10;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  rainPoints = new THREE.Points(pGeo, new THREE.PointsMaterial({
+    color: 0x3a4a7a, size: 0.18, transparent: true, opacity: 0.5
+  }));
+  scene.add(rainPoints);
+
+  var mx = 0, my = 0, tmx = 0, tmy = 0;
+  window.addEventListener('pointermove', function(e) {
+    tmx = (e.clientX / window.innerWidth - 0.5);
+    tmy = (e.clientY / window.innerHeight - 0.5);
+  });
+
+  var clock = new THREE.Clock();
+  var camStart = performance.now();
+  function animate() {
+    requestAnimationFrame(animate);
+    var t = clock.getElapsedTime();
+    var intro = Math.min((performance.now() - camStart) / 4500, 1);
+    var eIntro = 1 - Math.pow(1 - intro, 3);
+
+    mx += (tmx - mx) * 0.04; my += (tmy - my) * 0.04;
+    var orbit = t * 0.045;
+    var radius = 64 - eIntro * 4;
+    camera.position.x = Math.sin(orbit) * radius + mx * 8;
+    camera.position.z = Math.cos(orbit) * radius;
+    camera.position.y = 4 + eIntro * 30 + my * 6;
+    camera.lookAt(0, 18 + eIntro * 22, 0);
+
+    var blink = (Math.sin(t * 3.2) * 0.5 + 0.5);
+    beaconLight.intensity = 1.0 + blink * 2.4;
+    beaconMesh.material.color.setRGB(0, 0.6 + blink * 0.4, 0.45 + blink * 0.25);
+    ring.material.opacity = 0.3 + blink * 0.4;
+
+    amberWindows.forEach(function(w) {
+      var f = 0.7 + Math.sin(t * 1.3 + w.phase) * 0.3;
+      w.mesh.material.color.setRGB(0.93 * f, 0.62 * f, 0.15 * f);
+    });
+
+    var arr = rainPoints.geometry.attributes.position.array;
+    for (var i = 0; i < pCount; i++) {
+      arr[i * 3 + 1] -= 0.35;
+      if (arr[i * 3 + 1] < 0) arr[i * 3 + 1] = 120;
+    }
+    rainPoints.geometry.attributes.position.needsUpdate = true;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.__blueFlash = function() {
+    var big = Math.random() > 0.7;
+    blueEmergency.intensity = big ? 20 : 8;
+    setTimeout(function() { blueEmergency.intensity = 0; }, big ? 40 : 20);
+  };
+
+  window.addEventListener('resize', function() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+
+/* ===== VIDEO PRE-ROLL → init tower → START GAME button ===== */
+(function() {
+  var preroll = document.getElementById('preroll');
+  var video = document.getElementById('prerollVideo');
+  var skipBtn = document.getElementById('skipBtn');
+  var ended = false;
+  var started = false;
+
+  function bootReact() {
+    if (started) return; started = true;
+    var root = document.getElementById('root');
+    root.style.display = 'block';
+    root.style.animation = 'rootFadeIn 400ms ease-out forwards';
+    document.getElementById('startGameBtn').style.display = 'none';
+    if (window.__mountReact) window.__mountReact();
+  }
+
+  function showTower() {
+    if (ended) return; ended = true;
+    preroll.style.transition = 'opacity 800ms ease';
+    preroll.style.opacity = '0';
+    if (video) video.pause();
+    setTimeout(function() {
+      preroll.style.display = 'none';
+      initTower();
+      document.getElementById('startGameBtn').style.display = 'block';
+      var flashTimer = 0;
+      function doFlash() {
+        var flicker = document.getElementById('flicker');
+        if (!flicker) return;
+        flicker.style.transition = 'none';
+        flicker.style.opacity = '1';
+        if (window.__blueFlash) window.__blueFlash();
+        setTimeout(function() { flicker.style.transition = 'opacity 60ms'; flicker.style.opacity = '0'; }, 30);
+        flashTimer = setTimeout(doFlash, 800 + Math.random() * 2200);
+      }
+      doFlash();
+    }, 800);
+  }
+
+  document.getElementById('startGameBtn').addEventListener('click', bootReact);
+
+  video.addEventListener('ended', showTower);
+  skipBtn.addEventListener('click', showTower);
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' || e.key === ' ') showTower(); });
+  setTimeout(function() { if (!ended) showTower(); }, 30000);
+})();
+
+/* ===== Auto mount React after entry visual ===== */
+function mountReact() {
+  var stage = document.getElementById('stage');
+  var root = document.getElementById('root');
+  document.querySelectorAll('#scene, #css-tower, .scanline, #flicker, .hud-corner, .ops-bar, .rail, .modal-backdrop').forEach(function(el) {
+    el.style.display = 'none';
+  });
+  stage.style.display = 'none';
+  root.style.display = 'block';
+  root.style.animation = 'rootFadeIn 400ms ease-out forwards';
+  if (window.__mountReact) window.__mountReact();
+}
+</script>
+
+</body>
+</html>
