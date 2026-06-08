@@ -859,7 +859,8 @@ h4 { font-size: var(--text-xl); }
     overflow: hidden;
   }
   .screen {
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .two-panel {
@@ -880,10 +881,8 @@ h4 { font-size: var(--text-xl); }
     min-height: 0;
     border-right: none;
     border-bottom: none;
-    overflow-y: auto;
+    overflow: visible;
     padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
   }
   .pattern-card-l0 {
     flex: none !important;
