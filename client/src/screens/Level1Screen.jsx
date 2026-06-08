@@ -3,6 +3,7 @@ import { useGame } from '../context/GameContext';
 import AIChatPanel from '../components/AIChatPanel';
 import Timer from '../components/Timer';
 import LevelBriefing from '../components/LevelBriefing';
+import FloorComplete from '../components/FloorComplete';
 import { TUTORIAL_GRIDS, TUTORIAL_NOTES, TUTORIAL_HINTS, ANSWER_CELLS } from '../data/tutorialGrids';
 
 function computeAnswer(grid) {
@@ -21,7 +22,6 @@ export default function Level1Screen() {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [currentHint, setCurrentHint] = useState(null);
   const [finalScore, setFinalScore] = useState(null);
-  const [reveal, setReveal] = useState(false);
   const [hintsOpen, setHintsOpen] = useState(
     typeof window !== 'undefined' && window.innerWidth > 767
   );
@@ -31,13 +31,6 @@ export default function Level1Screen() {
   const grid = TUTORIAL_GRIDS[variant];
   const note = TUTORIAL_NOTES[variant];
   const expected = useMemo(() => computeAnswer(grid), [grid]);
-
-  useEffect(() => {
-    if (finalScore !== null) {
-      const t = setTimeout(() => setReveal(true), 800);
-      return () => clearTimeout(t);
-    }
-  }, [finalScore]);
 
   const isCorner = (r, c) => ANSWER_CELLS.corners.some(cell => cell.r === r && cell.c === c);
   const isCross = (r, c) => ANSWER_CELLS.cross.some(cell => cell.r === r && cell.c === c);
@@ -93,24 +86,6 @@ export default function Level1Screen() {
       <div className="two-panel">
         <div className="left-panel">
           <div style={{ padding: 'var(--space-5)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', overflowY: 'auto' }}>
-
-            {reveal && (
-              <div className="card glow-green" style={{ textAlign: 'center', animation: 'fadeIn 0.5s ease' }}>
-                <div className="text-green" style={{ fontSize: 'var(--text-xl)', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.1em' }}>
-                  FLOOR 1 CLEARED
-                </div>
-                <p className="text-dim mt-2" style={{ fontSize: 'var(--text-sm)' }}>
-                  You found 9 numbers in the ASCII letter range and converted them to characters.
-                </p>
-                <p className="text-muted mt-2" style={{ fontSize: 'var(--text-xs)' }}>
-                  Score: {finalScore || 0} points
-                  {hintsUsed > 0 && ` (${hintsUsed} hint${hintsUsed > 1 ? 's' : ''} used: -${hintsUsed * 25} pts)`}
-                </p>
-                <button className="cta-primary mt-4" onClick={handleContinue}>
-                  ASCEND TO FLOOR 2
-                </button>
-              </div>
-            )}
 
             <div className="card" style={{ borderColor: 'var(--border-dim)', background: 'var(--bg-surface)' }}>
               <p className="text-dim" style={{ fontSize: 'var(--text-sm)', lineHeight: '1.7' }}>
@@ -268,6 +243,18 @@ export default function Level1Screen() {
           )}
         </div>
       </div>
+
+      {finalScore !== null && (
+        <FloorComplete
+          floorNum={1}
+          title="THE FIRST SIGNAL"
+          description="You found 9 numbers in the ASCII letter range and converted them to characters."
+          score={finalScore}
+          hintsUsed={hintsUsed}
+          nextFloor={2}
+          onAscend={handleContinue}
+        />
+      )}
     </div>
   );
 }

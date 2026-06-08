@@ -20,11 +20,11 @@ const ANSWER_KEY = {
     },
   },
   level2: {
-    'L2-P01': { answer: 'Bahdanau', acceptable: ['Bahdanau', 'Dzmitry Bahdanau', 'bahdanau'] },
-    'L2-P02': { answer: 'LeCun', acceptable: ['LeCun', 'Yann LeCun', 'lecun'] },
-    'L2-P03': { answer: 'Kingma', acceptable: ['Kingma', 'Diederik Kingma', 'kingma'] },
-    'L2-P04': { answer: 'Peters', acceptable: ['Peters', 'Matthew Peters', 'peters'] },
-    'L2-P05': { answer: 'Szegedy', acceptable: ['Szegedy', 'Christian Szegedy', 'szegedy'] },
+    'L2-P01': { answer: 'gao', acceptable: ['gao', 'bofei gao', 'Gao', 'Bofei Gao'] },
+    'L2-P02': { answer: 'jiang', acceptable: ['jiang', 'changjiu jiang', 'Jiang', 'Changjiu Jiang'] },
+    'L2-P03': { answer: 'li', acceptable: ['li', 'cheng li', 'Li', 'Cheng Li'] },
+    'L2-P04': { answer: 'tang', acceptable: ['tang', 'chuning tang', 'Tang', 'Chuning Tang'] },
+    'L2-P05': { answer: 'zhang', acceptable: ['zhang', 'dehao zhang', 'Zhang', 'Dehao Zhang'] },
   },
   final: {
     'FIN-01': {

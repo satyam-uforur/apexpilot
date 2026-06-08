@@ -7,14 +7,13 @@ const EntryScreen = lazy(() => import('./screens/EntryScreen'));
 const IntroScreen = lazy(() => import('./screens/IntroScreen'));
 const Level0Screen = lazy(() => import('./screens/Level0Screen'));
 const Level1Screen = lazy(() => import('./screens/Level1Screen'));
-const Level3Screen = lazy(() => import('./screens/Level3Screen'));
 const Level2Screen = lazy(() => import('./screens/Level2Screen'));
 const FinalRaceScreen = lazy(() => import('./screens/FinalRaceScreen'));
 const RevealScreen = lazy(() => import('./screens/RevealScreen'));
 const PostGameReport = lazy(() => import('./screens/PostGameReport'));
 
 const GAME_SCREENS = new Set([
-  'level_0', 'level_1', 'level_2', 'level_3', 'level_4',
+  'level_0', 'level_1', 'level_2', 'level_3',
 ]);
 
 const FALLBACK = <div style={{ height: '100vh', background: 'var(--bg-tower)' }} />;
@@ -31,9 +30,8 @@ export default function App() {
       case 'intro': return <IntroScreen />;
       case 'level_0': return <Level0Screen />;
       case 'level_1': return <Level1Screen />;
-      case 'level_2': return <Level3Screen />;
-      case 'level_3': return <Level2Screen />;
-      case 'level_4': return <FinalRaceScreen />;
+      case 'level_2': return <Level2Screen />;
+      case 'level_3': return <FinalRaceScreen />;
       case 'reveal': return <RevealScreen />;
       case 'report': return <PostGameReport />;
       default: return <EntryScreen />;

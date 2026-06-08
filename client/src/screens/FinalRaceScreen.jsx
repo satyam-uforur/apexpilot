@@ -192,7 +192,7 @@ export default function FinalRaceScreen() {
   };
 
   if (stage === 'briefing') {
-    return <LevelBriefing level="level_4" onContinue={() => setStage('playing')} />;
+    return <LevelBriefing level="level_3" onContinue={() => setStage('playing')} />;
   }
 
   return (

@@ -13,8 +13,7 @@ const initialState = {
       level_0: { completed: false, score: 0 },
       level_1: { completed: false, score: 0 },
       level_2: { completed: false, score: 0 },
-      level_3: { completed: false, score: 0 },
-      level_4: { submitted: false, passed: false },
+      level_3: { submitted: false, passed: false },
     },
   levelContent: null,
   currentLevel: null,
@@ -52,7 +51,7 @@ function gameReducer(state, action) {
     case 'USE_HINT':
       return { ...state, hintsRemaining: Math.max(0, state.hintsRemaining - 1) };
     case 'GAME_COMPLETED':
-      return { ...state, levelStates: { ...state.levelStates, level_4: { submitted: true, passed: action.payload.passed } } };
+      return { ...state, levelStates: { ...state.levelStates, level_3: { submitted: true, passed: action.payload.passed } } };
     default:
       return state;
   }
@@ -72,7 +71,7 @@ export function GameProvider({ children }) {
         sessionId: 'offline_' + Date.now(),
         candidateId: name || 'GHOST',
         startedAt: new Date().toISOString(),
-        variantAssignments: { level_0: 'a', level_1: 'a', level_2: 'a', level_3: 'a', level_4: 'a' },
+        variantAssignments: { level_0: 'a', level_1: 'a', level_2: 'a', level_3: 'a' },
       };
       dispatch({ type: 'SESSION_STARTED', payload: fallback });
     } finally {

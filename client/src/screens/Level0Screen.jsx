@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 import Timer from '../components/Timer';
 import LevelBriefing from '../components/LevelBriefing';
+import FloorComplete from '../components/FloorComplete';
 
 const PATTERNS = [
   { seq: [1, 2, 3, 4], ans: 5 },
@@ -121,23 +122,7 @@ export default function Level0Screen() {
       <div className="two-panel">
         <div className="left-panel" ref={leftPanelRef}>
           <div style={{ padding: 'var(--space-5)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', minHeight: 0 }}>
-            {stage === 'complete' && (
-              <div ref={completionRef} className="card glow-green" style={{ textAlign: 'center', flexShrink: 0 }}>
-                <div className="text-green" style={{ fontSize: 'var(--text-xl)', fontFamily: "'Bebas Neue', sans-serif" }}>
-                  SIGNAL PATTERN CONFIRMED
-                </div>
-                <p className="text-dim mt-2" style={{ fontSize: 'var(--text-sm)' }}>
-                  You identified the sequence. You converted it correctly. The tower does not test what you know. It tests how precisely you apply what you know.
-                </p>
-                <p className="text-muted mt-2" style={{ fontSize: 'var(--text-xs)' }}>
-                  Score: {finalScore} points
-                  {hintsUsed > 0 && ` (${hintsUsed} hint${hintsUsed > 1 ? 's' : ''} used: -${hintsUsed * 25} pts)`}
-                </p>
-                <button className="cta-primary mt-4" onClick={handleContinue}>
-                  ASCEND TO FLOOR 1
-                </button>
-              </div>
-            )}
+
             <p className="text-dim" style={{ fontSize: 'var(--text-xs)', lineHeight: '1.6' }}>
               <span className="text-red" style={{ fontWeight: 600 }}>OBJECTIVE:</span> A signal sequence has been intercepted. The pattern is corrupted at position 5. Identify the missing value. The tower wants the ASCII code of that number.
             </p>
@@ -268,6 +253,18 @@ export default function Level0Screen() {
           )}
         </div>
       </div>
+
+      {stage === 'complete' && (
+        <FloorComplete
+          floorNum={0}
+          title="FAULT LINES"
+          description="You identified the sequence. You converted it correctly. The tower does not test what you know. It tests how precisely you apply what you know."
+          score={finalScore}
+          hintsUsed={hintsUsed}
+          nextFloor={1}
+          onAscend={handleContinue}
+        />
+      )}
     </div>
   );
 }

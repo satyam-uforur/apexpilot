@@ -1,14 +1,13 @@
 import React from 'react';
 
 const FLOORS = [
-  { key: 'level_4', label: 'HELIPAD', num: 'R', type: 'rooftop' },
-  { key: 'level_3', label: 'F3', num: '3' },
+  { key: 'level_3', label: 'HELIPAD', num: 'R', type: 'rooftop' },
   { key: 'level_2', label: 'F2', num: '2' },
   { key: 'level_1', label: 'F1', num: '1' },
   { key: 'level_0', label: 'ENTRY', num: 'E' },
 ];
 
-const FLOOR_ORDER = ['level_0', 'level_1', 'level_2', 'level_3', 'level_4'];
+const FLOOR_ORDER = ['level_0', 'level_1', 'level_2', 'level_3'];
 
 export default function TowerSpine({ currentScreen, levelStates }) {
   const currentIdx = FLOOR_ORDER.indexOf(currentScreen);

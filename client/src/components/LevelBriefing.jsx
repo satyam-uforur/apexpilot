@@ -22,17 +22,6 @@ const BRIEFINGS = {
   },
   level_2: {
     lines: [
-      'Floor 2 — Fault Lines.',
-      'The tower\'s security module has been corrupted.',
-      'Faults injected with precision.',
-      'The damage forms a pattern.',
-      'Read the code. Count the errors.',
-      'The saboteur left a signature.',
-    ],
-    button: 'BEGIN FLOOR 2',
-  },
-  level_3: {
-    lines: [
       'A research document has been recovered from the tower\'s archive.',
       'Academic papers contain references. References contain authors.',
       'One surname \u2014 precisely extracted \u2014 unlocks this floor.',
@@ -40,9 +29,9 @@ const BRIEFINGS = {
       'The answer is not displayed openly.',
       'Search. Find the paper. Read the reference. Extract the name.',
     ],
-    button: 'BEGIN FLOOR 3',
+    button: 'BEGIN FLOOR 2',
   },
-  level_4: {
+  level_3: {
     lines: [
       'No more floors.',
       'The roof. The helicopter.',
@@ -88,7 +77,7 @@ export default function LevelBriefing({ level, onContinue }) {
       <div className="briefing-vignette" />
       <div className="briefing-content">
         <div className="briefing-sub" style={{ animation: 'fadeSlideIn 0.6s ease-out forwards' }}>
-          LEVEL {level === 'level_4' ? '—' : level.replace('level_', '')}
+          LEVEL {level === 'level_3' ? '—' : level.replace('level_', '')}
         </div>
 
         <div className="briefing-lines">

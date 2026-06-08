@@ -2,88 +2,66 @@ import React, { useState, useMemo } from 'react';
 import { useGame } from '../context/GameContext';
 import Timer from '../components/Timer';
 import LevelBriefing from '../components/LevelBriefing';
+import FloorComplete from '../components/FloorComplete';
 
 const VARIANTS = [
   {
     id: 'L2-P01',
-    title: 'Solving Fuzzy Matrix Games with Triangular Type-2 Intuitionistic Fuzzy Numbers for Water Management Problem',
-    authors: '[Research Team, 2024]',
-    journal: 'Environmental Decision Systems',
-    references: [
-      '[1] Roy SK, Bhaumik A (2018) Intelligent water management: a triangular type-2 intuitionistic fuzzy matrix games approach. Water Resour Manag 32(3):949–968',
-      '[2] Abrishamchi A, Ebrahimian A, Tajrishi M et al (2005) Case study: application of multicriteria decision making to urban water supply. J Water Resour Plan Manag 131(4):326–335',
-      '[3] Zadeh LA (1965) Fuzzy sets. Inf Control 8:338–353',
-      '[4] Atanassov KT (1986) Intuitionistic fuzzy sets. Fuzzy Sets Syst 20(1):87–96',
-      '[5] Nan JX, Zhang MJ, Li DF (2010) A methodology for matrix games with payoffs of triangular intuitionistic fuzzy numbers. Int J Intell Syst 25(11):1143–1154',
-    ],
-    question: 'What is the surname of the FIRST AUTHOR listed in reference [2]?',
-    answer: ['abrishamchi'],
-    wrongCommon: ['a', 'abrishamchi a', 'ebrahimian', 'tajrishi'],
-    difficulty: 'Hard',
+    title: 'Kimi k1.5: Scaling Reinforcement Learning with LLMs',
+    authors: 'Kimi Team, Angang Du, Bofei Gao, Bowei Xing, Changjiu Jiang, Cheng Chen, Cheng Li, Chenjun Xiao, Chenzhuang Du, Chonghua Liao, Chuning Tang, Congcong Wang, Dehao Zhang, Enming Yuan, Enzhe Lu, Fengxiang Tang, Flood Sung, Guangda Wei, Guokun Lai, Haiqing Guo, Han Zhu, Hao Ding, Hao Hu, Hao Yang, Hao Zhang, Haotian Yao, Haotian Zhao, Haoyu Lu, Haoze Li, Haozhen Yu, Hongcheng Gao, Huabin Zheng, Huan Yuan, Jia Chen, Jianhang Guo, Jianlin Su, Jianzhou Wang, Jie Zhao, Jin Zhang, Jingyuan Liu, Junjie Yan, Junyan Wu, Lidong Shi, Ling Ye, Longhui Yu, Mengnan Dong, Neo Zhang, Ningchen Ma, Qiwei Pan, Qucheng Gong, Shaowei Liu, Shengling Ma, Shupeng Wei, Sihan Cao, Siying Huang, Tao Jiang, Weihao Gao, Weimin Xiong, Weiran He, Weixiao Huang, Weixin Xu, Wenhao Wu, Wenyang He, Xianghui Wei, Xianqing Jia, Xingzhe Wu, Xinran Xu, Xinxing Zu, Xinyu Zhou, Xuehai Pan, Y. Charles, Yang Li, Yangyang Hu, Yangyang Liu, Yanru Chen, Yejie Wang, Yibo Liu, Yidao Qin, Yifeng Liu, Ying Yang, Yiping Bao, Yulun Du, Yuxin Wu, Yuzhi Wang, Zaida Zhou, Zhaoji Wang, Zhaowei Li, Zhen Zhu, Zheng Zhang, Zhexu Wang, Zhilin Yang, Zhiqi Huang, Zihao Huang, Ziyao Xu, Zonghan Yang, Zongyu Lin',
+    journal: 'arXiv preprint 2025',
+    question: 'What is the surname of the 3rd author listed?',
+    answer: ['gao', 'bofei gao'],
+    wrongCommon: ['kimi', 'du', 'xing', 'jiang'],
+    difficulty: 'Medium',
   },
   {
     id: 'L2-P02',
-    title: 'Multi-Objective Optimization of Groundwater Remediation Using Genetic Algorithms with Fuzzy Preference Functions',
-    authors: '[Research Team, 2024]',
-    journal: 'Water Resources Engineering',
-    references: [
-      '[1] Deb K, Pratap A, Agarwal S et al (2002) A fast and elitist multiobjective genetic algorithm: NSGA-II. IEEE Trans Evol Comput 6(2):182–197',
-      '[2] Gorelick SM, Evans B, Remson I (1983) Identifying sources of groundwater pollution: an optimization approach. Water Resour Res 19(3):779–790',
-    ],
-    question: 'What is the surname of the FIRST AUTHOR listed in reference [1]?',
-    answer: ['deb'],
-    wrongCommon: ['pratap', 'agarwal', 'k'],
+    title: 'Kimi k1.5: Scaling Reinforcement Learning with LLMs',
+    authors: 'Kimi Team, Angang Du, Bofei Gao, Bowei Xing, Changjiu Jiang, Cheng Chen, Cheng Li, Chenjun Xiao, Chenzhuang Du, Chonghua Liao, Chuning Tang, Congcong Wang, Dehao Zhang, Enming Yuan, Enzhe Lu, Fengxiang Tang, Flood Sung, Guangda Wei, Guokun Lai, Haiqing Guo, Han Zhu, Hao Ding, Hao Hu, Hao Yang, Hao Zhang, Haotian Yao, Haotian Zhao, Haoyu Lu, Haoze Li, Haozhen Yu, Hongcheng Gao, Huabin Zheng, Huan Yuan, Jia Chen, Jianhang Guo, Jianlin Su, Jianzhou Wang, Jie Zhao, Jin Zhang, Jingyuan Liu, Junjie Yan, Junyan Wu, Lidong Shi, Ling Ye, Longhui Yu, Mengnan Dong, Neo Zhang, Ningchen Ma, Qiwei Pan, Qucheng Gong, Shaowei Liu, Shengling Ma, Shupeng Wei, Sihan Cao, Siying Huang, Tao Jiang, Weihao Gao, Weimin Xiong, Weiran He, Weixiao Huang, Weixin Xu, Wenhao Wu, Wenyang He, Xianghui Wei, Xianqing Jia, Xingzhe Wu, Xinran Xu, Xinxing Zu, Xinyu Zhou, Xuehai Pan, Y. Charles, Yang Li, Yangyang Hu, Yangyang Liu, Yanru Chen, Yejie Wang, Yibo Liu, Yidao Qin, Yifeng Liu, Ying Yang, Yiping Bao, Yulun Du, Yuxin Wu, Yuzhi Wang, Zaida Zhou, Zhaoji Wang, Zhaowei Li, Zhen Zhu, Zheng Zhang, Zhexu Wang, Zhilin Yang, Zhiqi Huang, Zihao Huang, Ziyao Xu, Zonghan Yang, Zongyu Lin',
+    journal: 'arXiv preprint 2025',
+    question: 'What is the surname of the 5th author listed?',
+    answer: ['jiang', 'changjiu jiang'],
+    wrongCommon: ['gao', 'xing', 'chen', 'li'],
     difficulty: 'Medium',
   },
   {
     id: 'L2-P03',
-    title: 'Neutrosophic Sets Applied to Supplier Selection in Humanitarian Logistics Networks',
-    authors: '[Research Team, 2024]',
-    journal: 'Logistics Systems Research',
-    references: [
-      '[1] Smarandache F (1998) Neutrosophy: neutrosophic probability, set and logic. American Research Press, Rehoboth',
-      '[2] Tzeng GH, Huang JJ (2011) Multiple attribute decision making: methods and applications. CRC Press, Boca Raton',
-      '[3] Peng JJ, Wang JQ, Wu XH et al (2015) Multi-valued neutrosophic sets and power aggregation operators with their applications. Int J Comput Intell Syst 8(2):345–363',
-    ],
-    question: 'What is the surname of the FIRST AUTHOR listed in reference [3]?',
-    answer: ['peng'],
-    wrongCommon: ['wang', 'wu', 'jj', 'peng jj'],
+    title: 'Kimi k1.5: Scaling Reinforcement Learning with LLMs',
+    authors: 'Kimi Team, Angang Du, Bofei Gao, Bowei Xing, Changjiu Jiang, Cheng Chen, Cheng Li, Chenjun Xiao, Chenzhuang Du, Chonghua Liao, Chuning Tang, Congcong Wang, Dehao Zhang, Enming Yuan, Enzhe Lu, Fengxiang Tang, Flood Sung, Guangda Wei, Guokun Lai, Haiqing Guo, Han Zhu, Hao Ding, Hao Hu, Hao Yang, Hao Zhang, Haotian Yao, Haotian Zhao, Haoyu Lu, Haoze Li, Haozhen Yu, Hongcheng Gao, Huabin Zheng, Huan Yuan, Jia Chen, Jianhang Guo, Jianlin Su, Jianzhou Wang, Jie Zhao, Jin Zhang, Jingyuan Liu, Junjie Yan, Junyan Wu, Lidong Shi, Ling Ye, Longhui Yu, Mengnan Dong, Neo Zhang, Ningchen Ma, Qiwei Pan, Qucheng Gong, Shaowei Liu, Shengling Ma, Shupeng Wei, Sihan Cao, Siying Huang, Tao Jiang, Weihao Gao, Weimin Xiong, Weiran He, Weixiao Huang, Weixin Xu, Wenhao Wu, Wenyang He, Xianghui Wei, Xianqing Jia, Xingzhe Wu, Xinran Xu, Xinxing Zu, Xinyu Zhou, Xuehai Pan, Y. Charles, Yang Li, Yangyang Hu, Yangyang Liu, Yanru Chen, Yejie Wang, Yibo Liu, Yidao Qin, Yifeng Liu, Ying Yang, Yiping Bao, Yulun Du, Yuxin Wu, Yuzhi Wang, Zaida Zhou, Zhaoji Wang, Zhaowei Li, Zhen Zhu, Zheng Zhang, Zhexu Wang, Zhilin Yang, Zhiqi Huang, Zihao Huang, Ziyao Xu, Zonghan Yang, Zongyu Lin',
+    journal: 'arXiv preprint 2025',
+    question: 'What is the surname of the 7th author listed?',
+    answer: ['li', 'cheng li'],
+    wrongCommon: ['chen', 'xiao', 'du', 'liao'],
     difficulty: 'Medium',
   },
   {
     id: 'L2-P04',
-    title: 'Hesitant Fuzzy Linguistic Preference Relations in Group Decision Making for Renewable Energy Site Selection',
-    authors: '[Research Team, 2024]',
-    journal: 'Energy Systems Research',
-    references: [
-      '[1] Rodríguez RM, Martínez L, Herrera F (2012) Hesitant fuzzy linguistic term sets for decision making. IEEE Trans Fuzzy Syst 20(1):109–119',
-      '[2] Büyüközkan G, Güleryüz S (2016) Multi criteria group decision making approach for smart phone selection using intuitionistic fuzzy information. Comput Ind Eng 101:14–22',
-    ],
-    question: 'What is the surname of the FIRST AUTHOR listed in reference [1]?',
-    answer: ['rodríguez', 'rodriguez'],
-    wrongCommon: ['martinez', 'herrera', 'rm'],
+    title: 'Kimi k1.5: Scaling Reinforcement Learning with LLMs',
+    authors: 'Kimi Team, Angang Du, Bofei Gao, Bowei Xing, Changjiu Jiang, Cheng Chen, Cheng Li, Chenjun Xiao, Chenzhuang Du, Chonghua Liao, Chuning Tang, Congcong Wang, Dehao Zhang, Enming Yuan, Enzhe Lu, Fengxiang Tang, Flood Sung, Guangda Wei, Guokun Lai, Haiqing Guo, Han Zhu, Hao Ding, Hao Hu, Hao Yang, Hao Zhang, Haotian Yao, Haotian Zhao, Haoyu Lu, Haoze Li, Haozhen Yu, Hongcheng Gao, Huabin Zheng, Huan Yuan, Jia Chen, Jianhang Guo, Jianlin Su, Jianzhou Wang, Jie Zhao, Jin Zhang, Jingyuan Liu, Junjie Yan, Junyan Wu, Lidong Shi, Ling Ye, Longhui Yu, Mengnan Dong, Neo Zhang, Ningchen Ma, Qiwei Pan, Qucheng Gong, Shaowei Liu, Shengling Ma, Shupeng Wei, Sihan Cao, Siying Huang, Tao Jiang, Weihao Gao, Weimin Xiong, Weiran He, Weixiao Huang, Weixin Xu, Wenhao Wu, Wenyang He, Xianghui Wei, Xianqing Jia, Xingzhe Wu, Xinran Xu, Xinxing Zu, Xinyu Zhou, Xuehai Pan, Y. Charles, Yang Li, Yangyang Hu, Yangyang Liu, Yanru Chen, Yejie Wang, Yibo Liu, Yidao Qin, Yifeng Liu, Ying Yang, Yiping Bao, Yulun Du, Yuxin Wu, Yuzhi Wang, Zaida Zhou, Zhaoji Wang, Zhaowei Li, Zhen Zhu, Zheng Zhang, Zhexu Wang, Zhilin Yang, Zhiqi Huang, Zihao Huang, Ziyao Xu, Zonghan Yang, Zongyu Lin',
+    journal: 'arXiv preprint 2025',
+    question: 'What is the surname of the 11th author listed?',
+    answer: ['tang', 'chuning tang'],
+    wrongCommon: ['liao', 'wang', 'zhang', 'chen', 'li'],
     difficulty: 'Hard',
   },
   {
     id: 'L2-P05',
-    title: 'A Novel Interval-Valued Pythagorean Fuzzy TOPSIS Method for Evaluating Sustainable Transport Systems',
-    authors: '[Research Team, 2024]',
-    journal: 'Transportation Research',
-    references: [
-      '[1] Yager RR (2013) Pythagorean fuzzy subsets. In: Proc joint IFSA world congress NAFIPS annual meeting, pp 57–61',
-      '[2] Ilbahar E, Kara\u015fan A, Cebi S et al (2018) A novel approach to risk assessment for occupational health and safety using Pythagorean fuzzy AHP and fuzzy inference system. Saf Sci 103:124–136',
-    ],
-    question: 'What is the surname of the FIRST AUTHOR listed in reference [2]?',
-    answer: ['ilbahar'],
-    wrongCommon: ['karasan', 'cebi', 'e'],
-    difficulty: 'Medium',
+    title: 'Kimi k1.5: Scaling Reinforcement Learning with LLMs',
+    authors: 'Kimi Team, Angang Du, Bofei Gao, Bowei Xing, Changjiu Jiang, Cheng Chen, Cheng Li, Chenjun Xiao, Chenzhuang Du, Chonghua Liao, Chuning Tang, Congcong Wang, Dehao Zhang, Enming Yuan, Enzhe Lu, Fengxiang Tang, Flood Sung, Guangda Wei, Guokun Lai, Haiqing Guo, Han Zhu, Hao Ding, Hao Hu, Hao Yang, Hao Zhang, Haotian Yao, Haotian Zhao, Haoyu Lu, Haoze Li, Haozhen Yu, Hongcheng Gao, Huabin Zheng, Huan Yuan, Jia Chen, Jianhang Guo, Jianlin Su, Jianzhou Wang, Jie Zhao, Jin Zhang, Jingyuan Liu, Junjie Yan, Junyan Wu, Lidong Shi, Ling Ye, Longhui Yu, Mengnan Dong, Neo Zhang, Ningchen Ma, Qiwei Pan, Qucheng Gong, Shaowei Liu, Shengling Ma, Shupeng Wei, Sihan Cao, Siying Huang, Tao Jiang, Weihao Gao, Weimin Xiong, Weiran He, Weixiao Huang, Weixin Xu, Wenhao Wu, Wenyang He, Xianghui Wei, Xianqing Jia, Xingzhe Wu, Xinran Xu, Xinxing Zu, Xinyu Zhou, Xuehai Pan, Y. Charles, Yang Li, Yangyang Hu, Yangyang Liu, Yanru Chen, Yejie Wang, Yibo Liu, Yidao Qin, Yifeng Liu, Ying Yang, Yiping Bao, Yulun Du, Yuxin Wu, Yuzhi Wang, Zaida Zhou, Zhaoji Wang, Zhaowei Li, Zhen Zhu, Zheng Zhang, Zhexu Wang, Zhilin Yang, Zhiqi Huang, Zihao Huang, Ziyao Xu, Zonghan Yang, Zongyu Lin',
+    journal: 'arXiv preprint 2025',
+    question: 'What is the surname of the 13th author listed?',
+    answer: ['zhang', 'dehao zhang'],
+    wrongCommon: ['wang', 'tang', 'liao', 'chen', 'yuan'],
+    difficulty: 'Hard',
   },
 ];
 
 const HINTS = [
-  'Academic citations list authors in a specific order. The first name listed carries the most weight. Find the right reference. Find the first name in it. The format will tell you what is surname and what is initial.',
-  'In this citation style, authors appear as SURNAME INITIAL. Not INITIAL SURNAME. The answer is a surname. It is longer than four letters. It does not appear in the first or last reference shown.',
-  'The answer starts with a letter at the beginning of the alphabet. It has between 5 and 11 letters. Only the surname — not the initial after it.',
+  'Papers list authors in a specific order. Count from the very beginning of the author list. Every comma-separated entry counts, including team or group names.',
+  'Find the paper on arXiv or the publisher website. The author list is right below the title. Count positions carefully starting from 1.',
+  'The answer is a surname — the last word of the author entry. Submit only the surname, not the full name. Case does not matter.',
+  'Double-check your count. Some author lists are very long. The exact position matters. Count again from position 1 to be sure.',
 ];
 
 function normalize(input) {
@@ -94,19 +72,10 @@ function getWrongFeedback(input, variant) {
   const norm = normalize(input);
   if (norm.length <= 1) return 'That appears to be an initial, not a surname.';
   if (norm.includes(' ')) return 'Submit the surname only. Not the full author entry.';
-  const allSurnames = variant.references
-    .flatMap(r => {
-      const match = r.match(/\[(\d+)\]/);
-      if (!match) return [];
-      const idx = parseInt(match[1], 10);
-      const afterBracket = r.slice(r.indexOf(']') + 1).trim();
-      const authors = afterBracket.split(/[\(\d]/)[0].trim();
-      return authors.split(',').map(a => a.trim().split(/\s+/)[0]?.toLowerCase()).filter(Boolean);
-    });
-  if (allSurnames.includes(norm) && !variant.answer.includes(norm)) {
-    return 'That name appears in the references but is not the first author of the requested reference. Check which reference the question asks about.';
+  if (variant.wrongCommon?.includes(norm)) {
+    return 'That surname appears in the author list but not at the position asked. Count again from position 1.';
   }
-  return 'Incorrect. Reread the citation carefully.';
+  return 'Incorrect. Check the author list and count positions carefully.';
 }
 
 export default function Level2Screen() {
@@ -119,12 +88,13 @@ export default function Level2Screen() {
   const [attempts, setAttempts] = useState(0);
   const [startTime] = useState(Date.now());
   const [timeExpired, setTimeExpired] = useState(false);
+  const [finalScore, setFinalScore] = useState(null);
   const [hintsOpen, setHintsOpen] = useState(
     typeof window !== 'undefined' && window.innerWidth > 767
   );
 
   const variant = useMemo(() => {
-    const raw = state.variantAssignments?.level3;
+    const raw = state.variantAssignments?.level2;
     const variants = VARIANTS;
     if (raw && variants[raw]) return variants[raw];
     const idx = Math.floor(Math.random() * variants.length);
@@ -140,10 +110,11 @@ export default function Level2Screen() {
       const baseScore = scoreMap[attempts] || 50;
       const penalty = hintsUsed * 25;
       const bonus = timeSpent < 60 ? 75 : timeSpent < 120 ? 50 : 0;
-      const finalScore = Math.max(0, baseScore - penalty + bonus);
+      const fs = Math.max(0, baseScore - penalty + bonus);
+      setFinalScore(fs);
       setMessage('CITATION VERIFIED.');
       setStage('complete');
-      dispatch({ type: 'LEVEL_COMPLETED', payload: { level: 'level_3', data: { completed: true, score: finalScore } } });
+      dispatch({ type: 'LEVEL_COMPLETED', payload: { level: 'level_2', data: { completed: true, score: fs } } });
     } else {
       setMessage(getWrongFeedback(answer, variant));
       setAttempts(a => a + 1);
@@ -159,7 +130,7 @@ export default function Level2Screen() {
   };
 
   const handleContinue = () => {
-    dispatch({ type: 'SET_SCREEN', payload: 'level_4' });
+    dispatch({ type: 'SET_SCREEN', payload: 'level_3' });
   };
 
   const handleTimeUp = () => {
@@ -168,7 +139,7 @@ export default function Level2Screen() {
   };
 
   if (stage === 'briefing') {
-    return <LevelBriefing level="level_3" onContinue={() => setStage('playing')} />;
+    return <LevelBriefing level="level_2" onContinue={() => setStage('playing')} />;
   }
 
   return (
@@ -176,7 +147,7 @@ export default function Level2Screen() {
       <div className="floor-atmosphere floor-atmo-2" />
       <div className="vignette" />
       <div className="floor-header">
-        <span className="floor-label">FLOOR 3</span>
+        <span className="floor-label">FLOOR 2</span>
         <span className="mission-name">CITATION TRACE</span>
         <Timer seconds={600} onExpire={handleTimeUp} />
       </div>
@@ -185,7 +156,7 @@ export default function Level2Screen() {
         <div className="left-panel" style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: 'var(--space-5)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', minHeight: 0 }}>
             <p className="text-dim" style={{ fontSize: 'var(--text-xs)', lineHeight: '1.6' }}>
-              <span className="text-red" style={{ fontWeight: 600 }}>OBJECTIVE:</span> A research document has been recovered. The paper title is real. The question points to a specific citation. The references are not displayed here — you must find the paper and locate the answer yourself.
+              <span className="text-red" style={{ fontWeight: 600 }}>OBJECTIVE:</span> A research paper has been identified. The author list is not shown here. Find the paper online, count the author positions, and submit the surname at the requested position.
             </p>
 
             <div className="card" style={{
@@ -199,7 +170,7 @@ export default function Level2Screen() {
                 lineHeight: '1.8',
               }}>
                 <div className="text-green" style={{ fontSize: 'var(--text-xs)', fontWeight: 700, marginBottom: 'var(--space-2)' }}>
-                  FLOOR 3 — CITATION TRACE
+                  FLOOR 2 — CITATION TRACE
                 </div>
                 <div className="text-ghost" style={{ fontSize: 'var(--text-xs)', marginBottom: 'var(--space-3)' }}>
                   INTELLIGENCE VERIFICATION PROTOCOL
@@ -213,7 +184,7 @@ export default function Level2Screen() {
                 </div>
 
                 <div style={{ color: 'var(--text-ghost)', fontSize: '10px', marginBottom: 'var(--space-3)' }}>
-                  Authors: {variant.authors} | Journal: {variant.journal}
+                  Journal: {variant.journal}
                 </div>
 
                 <div className="text-muted" style={{ fontSize: 'var(--text-sm)', fontWeight: 600, marginBottom: 'var(--space-1)' }}>
@@ -223,25 +194,13 @@ export default function Level2Screen() {
                   {variant.question}
                 </div>
                 <div className="text-ghost" style={{ fontSize: '10px', fontStyle: 'italic' }}>
-                  Submit the surname only. Exact spelling required. Find the paper online to locate the reference.
+                  Submit the surname only. Exact spelling required. Find the paper online and count the author list.
                 </div>
               </div>
             </div>
           </div>
 
-          {stage === 'complete' ? (
-            <div className="card glow-green" style={{ textAlign: 'center', flexShrink: 0, margin: 'var(--space-4)' }}>
-              <div className="text-green" style={{ fontSize: 'var(--text-xl)', fontFamily: "'Bebas Neue', sans-serif" }}>
-                CITATION VERIFIED
-              </div>
-              <p className="text-dim mt-2" style={{ fontSize: 'var(--text-sm)' }}>
-                The reference was real. The author was real. The answer was in plain sight — buried inside a paper most people would never read.
-              </p>
-              <button className="cta-primary mt-4" onClick={handleContinue}>
-                ASCEND TO FLOOR 4
-              </button>
-            </div>
-          ) : (
+          {stage !== 'complete' && (
             <div className="submission-bar">
               <input
                 type="text"
@@ -305,6 +264,18 @@ export default function Level2Screen() {
           </div>
         </div>
       </div>
+
+      {stage === 'complete' && (
+        <FloorComplete
+          floorNum={2}
+          title="CITATION TRACE"
+          description="The reference was real. The author was real. The answer was in plain sight — buried inside a paper most people would never read."
+          score={finalScore}
+          hintsUsed={hintsUsed}
+          nextFloor={3}
+          onAscend={handleContinue}
+        />
+      )}
     </div>
   );
 }
