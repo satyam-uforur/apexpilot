@@ -13,7 +13,7 @@ app.use(express.json());
 
 const sessionManager = new SessionManager();
 
-app.use(express.static(path.join(__dirname, '../../client/dist')));
+app.use(express.static(path.join(__dirname, '../../public')));
 
 app.post('/api/session/start', (req, res) => {
   const session = sessionManager.createSession(req.body.candidateName || null);
@@ -91,7 +91,7 @@ app.get('/api/level/:level/content', (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
+  res.sendFile(path.join(__dirname, '../../public/index.html'));
 });
 
 const PORT = process.env.PORT || 3001;

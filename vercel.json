@@ -1,8 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "framework": null,
+  "buildCommand": "cd client && npm run build",
   "installCommand": "npm install && cd server && npm install && cd ../client && npm install",
-  "outputDirectory": "client/dist",
+  "outputDirectory": "public",
   "functions": {
     "api/index.js": {
       "memory": 256,
