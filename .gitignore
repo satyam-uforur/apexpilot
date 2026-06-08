@@ -3,4 +3,3 @@ client/dist/
 public/
 .env
 logs/
-*.mp4
