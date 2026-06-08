@@ -197,10 +197,14 @@ export default function Level0Screen() {
           )}
         </div>
 
-        <div className={`right-panel${hintsOpen ? '' : ' collapsed'}`} style={{ display: 'flex', flexDirection: 'column' }}>
+        <div
+          className={`right-panel${hintsOpen ? '' : ' collapsed'}`}
+          style={{ display: 'flex', flexDirection: 'column' }}
+          onClick={() => { if (hintsOpen) setHintsOpen(false); }}
+        >
           <div
             className="hint-panel-header hints-toggle"
-            onClick={() => setHintsOpen(o => !o)}
+            onClick={(e) => { e.stopPropagation(); setHintsOpen(o => !o); }}
             style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', userSelect: 'none' }}
           >
             <span className="hint-panel-title" style={{ fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -211,9 +215,7 @@ export default function Level0Screen() {
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 'var(--text-sm)',
                 color: state.hintsRemaining <= 1 ? 'var(--red-alert)' : 'var(--green-apex)',
-
               }}>
-
                 <span>{state.hintsRemaining}</span>/5
               </span>
               <span className="hints-arrow" style={{
@@ -226,7 +228,8 @@ export default function Level0Screen() {
             </span>
           </div>
           {hintsOpen && (
-          <div className="right-panel-scroll" style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'var(--border-dim) transparent' }}>
+          <div className="right-panel-scroll" onClick={(e) => e.stopPropagation()} style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'var(--border-dim) transparent' }}>
+            <div className="hint-modal-close" onClick={() => setHintsOpen(false)}>✕</div>
             <div style={{ padding: 'var(--space-3) var(--space-4)' }}>
               <button
                 className="hint-btn"

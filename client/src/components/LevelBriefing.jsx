@@ -13,12 +13,12 @@ const BRIEFINGS = {
   },
   level_1: {
     lines: [
-      'The Tower stands where nothing should stand.',
-      'At its base, a signal — old, buried, waiting.',
-      '144 data points. Only 9 carry meaning.',
-      'Separate the signal from the noise.',
+      'The pilot needs structured intel from a raw incident report.',
+      'Eight specific fields must be extracted as clean JSON.',
+      'Your prompt is the only tool.',
+      'Write it precisely. Score above 80% to pass.',
     ],
-    button: 'BEGIN FLOOR 1',
+    button: 'BEGIN EXTRACTION',
   },
   level_2: {
     lines: [
@@ -33,14 +33,13 @@ const BRIEFINGS = {
   },
   level_3: {
     lines: [
-      'No more floors.',
-      'The roof. The helicopter.',
-      'The pilot has one condition:',
-      '"Prove you can direct an AI."',
-      'Write the prompt that extracts what I need.',
-      'Score above 80%. Or you stay on the roof.',
+      'The Tower stands where nothing should stand.',
+      'At its base, a signal — old, buried, waiting.',
+      '144 data points. Only 9 carry meaning.',
+      'Above, a helicopter cuts through the static.',
+      'Separate the signal from the noise, and ascend.',
     ],
-    button: 'CONFRONT THE THRESHOLD',
+    button: 'BEGIN SIGNAL DECODE',
   },
 };
 
@@ -77,7 +76,7 @@ export default function LevelBriefing({ level, onContinue }) {
       <div className="briefing-vignette" />
       <div className="briefing-content">
         <div className="briefing-sub" style={{ animation: 'fadeSlideIn 0.6s ease-out forwards' }}>
-          LEVEL {level === 'level_3' ? '—' : level.replace('level_', '')}
+          LEVEL {level.replace('level_', '')}
         </div>
 
         <div className="briefing-lines">

@@ -29,9 +29,9 @@ export default function App() {
       case 'entry': return <EntryScreen />;
       case 'intro': return <IntroScreen />;
       case 'level_0': return <Level0Screen />;
-      case 'level_1': return <Level1Screen />;
+      case 'level_1': return <FinalRaceScreen />;
       case 'level_2': return <Level2Screen />;
-      case 'level_3': return <FinalRaceScreen />;
+      case 'level_3': return <Level1Screen />;
       case 'reveal': return <RevealScreen />;
       case 'report': return <PostGameReport />;
       default: return <EntryScreen />;

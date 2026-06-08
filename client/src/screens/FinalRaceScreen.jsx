@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import Timer from '../components/Timer';
 import LevelBriefing from '../components/LevelBriefing';
-import { submitFinalAnswer } from '../api/client';
-import { saveGameEnd } from '../lib/leaderboard';
+import FloorComplete from '../components/FloorComplete';
 
 const TARGET_FIELDS = [
   { key: 'incident_time', type: 'string', example: '14:32' },
@@ -83,7 +82,7 @@ function evaluatePrompt(prompt) {
 }
 
 export default function FinalRaceScreen() {
-  const { state, dispatch, submitLevelAnswer, generateReport } = useGame();
+  const { state, dispatch } = useGame();
   const [prompt, setPrompt] = useState('');
   const [stage, setStage] = useState('briefing');
   const [hintsUsed, setHintsUsed] = useState(0);
@@ -91,22 +90,12 @@ export default function FinalRaceScreen() {
   const [evalResult, setEvalResult] = useState(null);
   const [showEval, setShowEval] = useState(false);
   const [evalPhase, setEvalPhase] = useState(0);
-  const [showExtraction, setShowExtraction] = useState(false);
+  const [finalScore, setFinalScore] = useState(null);
+  const [ascendChosen, setAscendChosen] = useState(false);
   const [hintsOpen, setHintsOpen] = useState(
     typeof window !== 'undefined' && window.innerWidth > 767
   );
-  const [videoFailed, setVideoFailed] = useState(false);
-  const videoRef = useRef(null);
   const [startTime] = useState(Date.now());
-  const [remainingAttempts, setRemainingAttempts] = useState(3);
-
-  useEffect(() => {
-    if (videoRef.current) {
-      const isMobile = window.innerWidth < 768;
-      videoRef.current.playbackRate = isMobile ? 0.75 : 1.0;
-      videoRef.current.play().catch(() => setVideoFailed(true));
-    }
-  }, []);
 
   const handleSubmit = () => {
     if (!prompt.trim()) return;
@@ -129,11 +118,7 @@ export default function FinalRaceScreen() {
     setTimeout(() => setEvalPhase(4), 1400);
     setTimeout(() => setEvalPhase(5), 1800);
 
-    if (passed) {
-      dispatch({ type: 'GAME_COMPLETED', payload: { passed: true } });
-    }
-
-    setRemainingAttempts(a => a - 1);
+    setFinalScore(totalScore);
   };
 
   const handleHint = () => {
@@ -143,149 +128,157 @@ export default function FinalRaceScreen() {
     dispatch({ type: 'USE_HINT' });
   };
 
-  const showScoreCard = useCallback(() => {
-    const totalTime = Math.floor((Date.now() - (state.startedAt ? new Date(state.startedAt).getTime() : startTime)) / 1000);
-    const prevLevelScores = Object.values(state.levelStates)
-      .filter(ls => typeof ls.score === 'number')
-      .reduce((sum, ls) => sum + ls.score, 0);
-    const promptScore = evalResult ? evalResult.totalScore : 0;
-    const overallScore = promptScore;
-    const skillScores = {
-      observation: Math.min(100, Math.round((prevLevelScores > 0 ? 40 : 0) + promptScore * 0.5)),
-      promptEngineering: Math.min(100, Math.round(promptScore * 0.9)),
-      reasoning: Math.min(100, Math.round(40 + promptScore * 0.4)),
-      verification: Math.min(100, Math.round(30 + promptScore * 0.6)),
-      research: Math.min(100, Math.round(20 + promptScore * 0.5)),
-      adaptability: Math.min(100, Math.round(30 + promptScore * 0.4)),
-      communication: Math.min(100, Math.round(promptScore * 0.7)),
-      competitive: Math.min(100, Math.round(prevLevelScores > 200 ? 60 : 20 + promptScore * 0.3)),
-    };
-    const eloBefore = 1000;
-    const eloDelta = Math.round(32 * (overallScore / 100 - 0.5));
-    const eloAfter = eloBefore + eloDelta;
-    const rank = eloAfter >= 3500 ? 'Apex' : eloAfter >= 3000 ? 'Master' : eloAfter >= 2500 ? 'Diamond' : eloAfter >= 2000 ? 'Platinum' : eloAfter >= 1500 ? 'Gold' : eloAfter >= 1000 ? 'Silver' : eloAfter >= 500 ? 'Bronze' : 'Iron';
-    const sortedSkills = Object.entries(skillScores).sort((a, b) => b[1] - a[1]);
-    dispatch({ type: 'SET_REPORT', payload: {
-      candidateId: state.candidateId || 'AGENT',
-      timestamp: new Date().toISOString(),
-      totalTime,
-      skillScores,
-      overallScore,
-      eloBefore, eloDelta, eloAfter, rank,
-      topStrengths: sortedSkills.slice(0, 3).map(([k, v]) => ({ skill: k, score: v })),
-      topWeaknesses: sortedSkills.slice(-3).reverse().map(([k, v]) => ({ skill: k, score: v })),
-      levelBreakdown: Object.entries(state.levelStates).map(([k, v]) => ({
-        level: k, completed: v.completed || v.submitted, score: v.score || 0,
-      })),
-      recommendation: 'Keep practicing to improve your APEX Rank.',
-    }});
-  }, [state, evalResult, startTime]);
-
-  const handleRetryOrResult = () => {
-    if (!evalResult.passed && remainingAttempts > 0) {
-      setShowEval(false);
-      setEvalResult(null);
-      return;
-    }
+  const handleContinue = () => {
     setShowEval(false);
-    setShowExtraction(true);
-    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-    submitFinalAnswer(state.sessionId, prompt, 0, '', timeSpent).catch(e =>
-      console.warn('Final answer submit failed (non-fatal):', e.message)
-    );
-    setTimeout(showScoreCard, 1500);
+    setAscendChosen(true);
+  };
+
+  const handleAscend = () => {
+    if (finalScore !== null) {
+      dispatch({ type: 'LEVEL_COMPLETED', payload: { level: 'level_1', data: { completed: true, score: finalScore } } });
+    }
+    dispatch({ type: 'SET_SCREEN', payload: 'level_2' });
   };
 
   if (stage === 'briefing') {
-    return <LevelBriefing level="level_3" onContinue={() => setStage('playing')} />;
+    return <LevelBriefing level="level_1" onContinue={() => setStage('playing')} />;
   }
 
   return (
-    <div className="helipad-screen">
-      {!videoFailed ? (
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          className="helipad-video-bg"
-        >
-          <source src="/safinal.mp4" type="video/mp4" />
-        </video>
-      ) : (
-        <div className="helipad-bg" />
-      )}
-      <div className="helipad-tint" />
+    <div className="screen ground-floor">
+      <div className="floor-atmosphere" />
+      <div className="vignette" />
+      <div className="floor-header ground-header">
+        <span className="floor-label">FLOOR 1</span>
+        <span className="ground-badge">1</span>
+        <span className="mission-name">EXTRACTION PROTOCOL</span>
+        <Timer seconds={0} running={false} />
+      </div>
 
-      <div className="helipad-panel">
-        <div className="helipad-header">
-          <span className="helipad-floor-label">HELIPAD</span>
-          <span className="helipad-mission">EXTRACTION PROTOCOL</span>
-          <span className="helipad-threshold-badge">THRESHOLD: 80%</span>
-        </div>
+      <div className="two-panel">
+        <div className="left-panel-wrapper">
+          <div className="left-panel">
+            <div style={{ padding: 'var(--space-5)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', minHeight: 0 }}>
 
-        <p className="text-dim" style={{ fontSize: 'var(--text-xs)', lineHeight: '1.6' }}>
-          <span className="text-red" style={{ fontWeight: 600 }}>OBJECTIVE:</span> The pilot needs structured intel from the incident report. Write a prompt that extracts all 8 required fields as clean JSON. Score 80% or higher to pass.
-        </p>
+              <p className="text-dim" style={{ fontSize: 'var(--text-xs)', lineHeight: '1.6' }}>
+                <span className="text-red" style={{ fontWeight: 600 }}>OBJECTIVE:</span> The pilot needs structured intel from the incident report. Write a prompt that extracts all 8 required fields as clean JSON. Score 80% or higher to pass.
+              </p>
 
-        <div className="incident-report">
-          <span className="incident-report-title">INCIDENT LOG</span>
-          {INCIDENT_REPORT.split('\n').map((line, i) => (
-            <div key={i} className="incident-field">
-              {line.includes(':') ? (
-                <>
-                  <span className="incident-key">{line.split(':')[0]}:</span>
-                  <span className="incident-value">{line.split(':').slice(1).join(':')}</span>
-                </>
-              ) : (
-                <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{line}</span>
+              <div className="card" style={{
+                flex: 1, display: 'flex', flexDirection: 'column',
+                background: 'var(--bg-void)', borderColor: 'var(--border-dim)',
+                overflow: 'hidden', minHeight: 0,
+              }}>
+                <div className="incident-report" style={{ flex: 1, overflow: 'auto', padding: 'var(--space-4)' }}>
+                  <span className="incident-report-title">INCIDENT LOG</span>
+                  {INCIDENT_REPORT.split('\n').map((line, i) => (
+                    <div key={i} className="incident-field">
+                      {line.includes(':') ? (
+                        <>
+                          <span className="incident-key">{line.split(':')[0]}:</span>
+                          <span className="incident-value">{line.split(':').slice(1).join(':')}</span>
+                        </>
+                      ) : (
+                        <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{line}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="prompt-section">
+                <span className="prompt-label">YOUR PROMPT</span>
+                <textarea
+                  className="prompt-textarea"
+                  placeholder="Write a prompt that extracts structured JSON from the incident report above..."
+                  value={prompt}
+                  onChange={e => setPrompt(e.target.value)}
+                  style={{ minHeight: '100px' }}
+                />
+              </div>
+
+              {!ascendChosen && (
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  className="submit-btn"
+                  onClick={handleSubmit}
+                  disabled={!prompt.trim() || showEval}
+                >
+                  SUBMIT PROMPT
+                </button>
+                <button
+                  className="hint-btn"
+                  onClick={handleHint}
+                  disabled={hintsUsed >= HINTS.length || state.hintsRemaining <= 0 || showEval}
+                  style={{ padding: '10px 20px', fontSize: 'var(--text-xs)' }}
+                >
+                  REQUEST HINT ({state.hintsRemaining} left)
+                </button>
+              </div>
               )}
+
+              {currentHint && (
+                <div className="hint-display" style={{
+                  padding: 'var(--space-3)',
+                  borderLeft: '2px solid var(--amber-warn)',
+                  fontSize: 'var(--text-xs)',
+                  color: 'var(--text-secondary)',
+                  lineHeight: '1.6',
+                }}>
+                  <div className="hint-label" style={{ fontSize: '10px', letterSpacing: '0.1em', marginBottom: '4px' }}>HINT {hintsUsed}/{HINTS.length}</div>
+                  <div className="hint-text" style={{ fontStyle: 'italic' }}>{currentHint}</div>
+                </div>
+              )}
+
             </div>
-          ))}
-        </div>
-
-        <div className="prompt-section">
-          <span className="prompt-label">YOUR PROMPT</span>
-          <textarea
-            className="prompt-textarea"
-            placeholder="Write a prompt that extracts structured JSON from the incident report above..."
-            value={prompt}
-            onChange={e => setPrompt(e.target.value)}
-          />
-        </div>
-
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button
-            className="helipad-submit"
-            onClick={handleSubmit}
-            disabled={!prompt.trim()}
-          >
-            SUBMIT PROMPT
-          </button>
-          <button
-            className="hint-btn"
-            onClick={handleHint}
-            disabled={hintsUsed >= HINTS.length || state.hintsRemaining <= 0}
-            style={{ padding: '10px 20px', fontSize: 'var(--text-xs)', alignSelf: 'flex-end' }}
-          >
-            REQUEST HINT ({state.hintsRemaining} left)
-          </button>
-        </div>
-
-        {currentHint && (
-          <div className="hint-display" style={{
-            padding: 'var(--space-3)',
-            borderLeft: '2px solid var(--amber-warn)',
-            fontSize: 'var(--text-xs)',
-            color: 'var(--text-secondary)',
-            lineHeight: '1.6',
-          }}>
-            <div className="hint-label" style={{ fontSize: '10px', letterSpacing: '0.1em', marginBottom: '4px' }}>HINT {hintsUsed}/{HINTS.length}</div>
-            <div className="hint-text" style={{ fontStyle: 'italic' }}>{currentHint}</div>
           </div>
-        )}
+        </div>
+
+        <div
+          className={'right-panel' + (hintsOpen ? '' : ' collapsed')}
+          style={{ display: 'flex', flexDirection: 'column' }}
+          onClick={() => { if (hintsOpen) setHintsOpen(false); }}
+        >
+          <div
+            className="hint-panel-header hints-toggle"
+            onClick={(e) => { e.stopPropagation(); setHintsOpen(o => !o); }}
+            style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', userSelect: 'none' }}
+          >
+            <span className="hint-panel-title" style={{ fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              HINTS
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <span className="hint-count" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'var(--text-sm)', color: state.hintsRemaining <= 1 ? 'var(--red-alert)' : 'var(--green-apex)' }}>
+                {state.hintsRemaining}/5
+              </span>
+              <span className="hints-arrow" style={{ fontSize: '10px', color: 'var(--text-ghost)', transition: 'transform 0.3s ease', transform: hintsOpen ? 'rotate(180deg)' : 'none' }}>▴</span>
+            </span>
+          </div>
+          <div className="right-panel-scroll" onClick={(e) => e.stopPropagation()} style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-3) var(--space-4)' }}>
+            <div className="hint-modal-close" onClick={() => setHintsOpen(false)}>✕</div>
+            <button
+              className="hint-btn"
+              onClick={handleHint}
+              disabled={hintsUsed >= HINTS.length || state.hintsRemaining <= 0 || showEval}
+              style={{ width: '100%', textAlign: 'left' }}
+            >
+              REQUEST HINT <span className="hint-cost">(-25 pts)</span>
+            </button>
+            {currentHint && (
+              <div className="hint-display" style={{
+                marginTop: 'var(--space-2)',
+                padding: 'var(--space-3)',
+                borderLeft: '2px solid var(--amber-warn)',
+                fontSize: 'var(--text-xs)',
+                color: 'var(--text-secondary)',
+                lineHeight: '1.6',
+              }}>
+                <div className="hint-label" style={{ fontSize: '10px', letterSpacing: '0.1em', marginBottom: '4px' }}>HINT {hintsUsed}/{HINTS.length}</div>
+                <div className="hint-text" style={{ fontStyle: 'italic' }}>{currentHint}</div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {showEval && evalResult && (
@@ -390,26 +383,24 @@ export default function FinalRaceScreen() {
             )}
 
             {evalPhase >= 5 && (
-              <button className="eval-continue" onClick={handleRetryOrResult}>
-                {evalResult.passed ? 'ASCEND' : remainingAttempts > 0 ? `RETRY (${remainingAttempts} left)` : 'VIEW RESULTS'}
+              <button className="eval-continue" onClick={handleContinue}>
+                ASCEND TO FLOOR 2
               </button>
             )}
           </div>
         </div>
       )}
 
-      {showExtraction && (
-        <div className="extraction-overlay">
-          <div className="extraction-word">EXTRACTION APPROVED</div>
-          <div className="extraction-subtext">
-            Your prompt worked.
-            The machine did exactly what you told it to do.
-            That is the skill.
-          </div>
-          <button className="cta-primary mt-4" onClick={showScoreCard}>
-            VIEW SCORE CARD
-          </button>
-        </div>
+      {ascendChosen && (
+        <FloorComplete
+          floorNum={1}
+          title="EXTRACTION PROTOCOL"
+          description="You wrote a precise prompt that extracted structured intelligence."
+          score={finalScore}
+          hintsUsed={hintsUsed}
+          nextFloor={2}
+          onAscend={handleAscend}
+        />
       )}
     </div>
   );

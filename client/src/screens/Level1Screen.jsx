@@ -1,9 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useGame } from '../context/GameContext';
-import AIChatPanel from '../components/AIChatPanel';
-import Timer from '../components/Timer';
 import LevelBriefing from '../components/LevelBriefing';
-import FloorComplete from '../components/FloorComplete';
 import { TUTORIAL_GRIDS, TUTORIAL_NOTES, TUTORIAL_HINTS, ANSWER_CELLS } from '../data/tutorialGrids';
 
 function computeAnswer(grid) {
@@ -25,8 +22,17 @@ export default function Level1Screen() {
   const [hintsOpen, setHintsOpen] = useState(
     typeof window !== 'undefined' && window.innerWidth > 767
   );
+  const [videoFailed, setVideoFailed] = useState(false);
+  const videoRef = useRef(null);
 
-  const rawVariant = state.variantAssignments?.level1;
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 1.0;
+      videoRef.current.play().catch(() => setVideoFailed(true));
+    }
+  }, []);
+
+  const rawVariant = state.variantAssignments?.tutorial;
   const variant = TUTORIAL_GRIDS[rawVariant] ? rawVariant : 'TUT-01';
   const grid = TUTORIAL_GRIDS[variant];
   const note = TUTORIAL_NOTES[variant];
@@ -48,7 +54,7 @@ export default function Level1Screen() {
       const score = Math.max(0, baseScore - penalty + bonus);
       setFinalScore(score);
       setMessage('PASSWORD VERIFIED.');
-      dispatch({ type: 'LEVEL_COMPLETED', payload: { level: 'level_1', data: { completed: true, score } } });
+      dispatch({ type: 'GAME_COMPLETED', payload: { passed: true, score: score } });
     } else {
       setMessage('Incorrect. Keep observing the grid.');
       setAttempts(a => a + 1);
@@ -64,196 +70,152 @@ export default function Level1Screen() {
   };
 
   const handleContinue = () => {
-    dispatch({ type: 'SET_SCREEN', payload: 'level_2' });
+    dispatch({ type: 'SET_SCREEN', payload: 'reveal' });
   };
 
   if (!briefingDone) {
-    return <LevelBriefing level="level_1" onContinue={() => setBriefingDone(true)} />;
+    return <LevelBriefing level="level_3" onContinue={() => setBriefingDone(true)} />;
   }
 
   return (
-    <div className="screen ground-floor">
-      <div className="floor-atmosphere" />
-      <div className="vignette" />
-      <div className="floor-header ground-header">
-        <span className="floor-label">FLOOR 1</span>
-        <span className="ground-badge">1</span>
-        <span className="mission-name">THE FIRST SIGNAL</span>
-        <Timer seconds={0} running={false} />
-      </div>
+    <div className="helipad-screen">
+      {!videoFailed ? (
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="helipad-video-bg"
+        >
+          <source src="/safinal.mp4" type="video/mp4" />
+        </video>
+      ) : (
+        <div className="helipad-bg" />
+      )}
+      <div className="helipad-tint" />
 
-      <div className="two-panel">
-        <div className="left-panel">
-          <div style={{ padding: 'var(--space-5)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', minHeight: 0 }}>
-
-            <div className="card" style={{ borderColor: 'var(--border-dim)', background: 'var(--bg-surface)' }}>
-              <p className="text-dim" style={{ fontSize: 'var(--text-sm)', lineHeight: '1.7' }}>
-                {finalScore !== null
-                  ? 'PASSWORD VERIFIED. The elevator hums to life. Floor 2 awaits.'
-                  : 'A corrupted signal matrix — 144 data points. The password is hidden within. Not all numbers matter.'}
-              </p>
-            </div>
-
-            <div className="card" style={{
-              flex: 1, display: 'flex', flexDirection: 'column',
-              background: 'var(--bg-void)', borderColor: 'var(--border-dim)',
-              padding: 'var(--space-4)',
-              minHeight: 0,
-            }}>
-              <div style={{ textAlign: 'center', marginBottom: 'var(--space-3)' }}>
-                <span className="text-muted" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-                  CORRUPTED SIGNAL MATRIX
-                </span>
-                <span className="text-ghost" style={{ fontSize: '10px', letterSpacing: '0.15em', marginLeft: 'var(--space-4)', textTransform: 'uppercase' }}>
-                  144 DATA POINTS | 12×12 GRID
-                </span>
-              </div>
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(12, 1fr)',
-                gap: '2px',
-                maxWidth: '480px',
-                margin: '0 auto',
-                width: '100%',
-              }}>
-                {grid.map((row, r) =>
-                  row.map((val, c) => {
-                    const corner = isCorner(r, c);
-                    const cross = isCross(r, c);
-                    const letter = isLetterRange(val);
-                    const identified = finalScore !== null && (corner || cross);
-                    return (
-                      <div key={`${r}-${c}`}
-                        className={`grid-cell${corner ? ' corner' : ''}${identified ? ' identified' : ''}`}
-                        style={{
-                          width: '100%',
-                          aspectRatio: '1',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          background: cross
-                            ? 'rgba(0, 255, 179, 0.025)'
-                            : 'var(--bg-surface-2)',
-                          border: corner
-                            ? '1px solid rgba(0, 255, 179, 0.12)'
-                            : '1px solid var(--border-hairline)',
-                          boxShadow: corner ? 'inset 0 0 6px rgba(0, 255, 179, 0.04)' : 'none',
-                          color: letter && finalScore === null
-                            ? 'var(--text-primary)'
-                            : identified
-                              ? 'var(--green-apex)'
-                              : 'var(--text-ghost)',
-                          fontWeight: letter ? 500 : 400,
-                        }}>
-                        {val}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-              <div className="instruction-note mt-3">
-                Note: "{note}"
-              </div>
-            </div>
-
+      <div className="helipad-panel" style={{
+        background: 'linear-gradient(to bottom, rgba(1,1,10,0.08), rgba(1,1,10,0.15) 40%, rgba(8,8,16,0.25) 100%)',
+        padding: '180px 40px 80px', gap: '16px',
+      }}>
+        <div className="card" style={{
+          background: 'transparent', borderColor: 'rgba(232,232,240,0.08)',
+          padding: 'var(--space-4)', overflow: 'auto',
+        }}>
+          <div className="crossword-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(12, 1fr)',
+            gap: '2px',
+            maxWidth: '480px',
+            margin: '0 auto',
+            width: '100%',
+            border: '1px solid rgba(232,232,240,0.12)',
+            padding: '2px',
+          }}>
+            {grid.map((row, r) =>
+              row.map((val, c) => {
+                const corner = isCorner(r, c);
+                const cross = isCross(r, c);
+                const identified = finalScore !== null && (corner || cross);
+                const isAnswer = corner || cross;
+                const borderColor = isAnswer
+                  ? corner
+                    ? 'rgba(0, 255, 179, 0.5)'
+                    : 'rgba(255, 179, 0, 0.5)'
+                  : 'transparent';
+                return (
+                  <div key={`${r}-${c}`}
+                    className={`grid-cell${corner ? ' corner' : ''}${identified ? ' identified' : ''}`}
+                    style={{
+                      width: '100%',
+                      aspectRatio: '1',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: identified ? 'rgba(0, 255, 179, 0.08)' : 'transparent',
+                      border: isAnswer ? `1.5px solid ${borderColor}` : '1px solid rgba(232,232,240,0.08)',
+                    }}>
+                    {val}
+                  </div>
+                );
+              })
+            )}
           </div>
 
-          {finalScore === null && (
-            <div className="submission-bar ground-bar">
-              <input
-                type="text"
-                className={`answer-input${message && !message.includes('VERIFIED') ? ' wrong' : ''}`}
-                placeholder="ENTER DECODED PASSWORD..."
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value.toUpperCase())}
-                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-              />
-              <button className="submit-btn" onClick={handleSubmit} disabled={!answer.trim()}>
-                SUBMIT
-              </button>
-              {message && (
-                <div className={`text-${message.includes('VERIFIED') ? 'green' : 'red'}`} style={{ fontSize: 'var(--text-xs)', whiteSpace: 'nowrap' }}>
-                  {message}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className={`right-panel${hintsOpen ? '' : ' collapsed'}`} style={{ display: 'flex', flexDirection: 'column' }}>
-          <div
-            className="hint-panel-header hints-toggle"
-            onClick={() => setHintsOpen(o => !o)}
-            style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', userSelect: 'none' }}
-          >
-            <span className="hint-panel-title" style={{ fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              HINTS
+          <div style={{ textAlign: 'center', marginTop: 'var(--space-2)' }}>
+            <span style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--text-primary)', textShadow: '0 0 8px rgba(0,0,0,0.8), 0 0 3px rgba(0,0,0,0.9)' }}>
+              CORRUPTED SIGNAL MATRIX
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-              <span className="hint-count" style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 'var(--text-sm)',
-                color: state.hintsRemaining <= 1 ? 'var(--red-alert)' : 'var(--green-apex)',
-
-              }}>
-
-                <span>{state.hintsRemaining}</span>/5
-              </span>
-              <span className="hints-arrow" style={{
-                fontSize: '10px',
-                color: 'var(--text-ghost)',
-                transition: 'transform 0.2s ease',
-                display: 'inline-block',
-                transform: hintsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              }}>▾</span>
+            <span style={{ fontSize: '10px', letterSpacing: '0.15em', marginLeft: 'var(--space-4)', textTransform: 'uppercase', color: 'var(--text-secondary)', textShadow: '0 0 6px rgba(0,0,0,0.7)' }}>
+              144 DATA POINTS | 12×12 GRID
             </span>
           </div>
-          {hintsOpen && (
-          <div className="right-panel-scroll" style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'var(--border-dim) transparent' }}>
-            <div style={{ padding: 'var(--space-3) var(--space-4)' }}>
-              <button
-                className="hint-btn"
-                onClick={handleHint}
-                disabled={hintsUsed >= TUTORIAL_HINTS.length || state.hintsRemaining <= 0 || finalScore !== null}
-                style={{ width: '100%', textAlign: 'left' }}
-              >
-                REQUEST HINT <span className="hint-cost">(-25 pts)</span>
-              </button>
-              {currentHint && (
-                <div className="hint-display" style={{
-                  marginTop: 'var(--space-2)',
-                  padding: 'var(--space-3)',
-                  background: 'var(--bg-surface-2)',
-                  borderLeft: '2px solid var(--amber-warn)',
-                  fontSize: 'var(--text-xs)',
-                  color: 'var(--text-secondary)',
-                  lineHeight: '1.6',
-                }}>
-                  <div className="hint-label" style={{ fontSize: '10px', letterSpacing: '0.1em', marginBottom: '4px' }}>HINT</div>
-                  <div className="hint-text" style={{ fontStyle: 'italic' }}>{currentHint}</div>
-                </div>
-              )}
-            </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-              <AIChatPanel level="level_1" disabled={finalScore !== null} showBudget={false} />
-            </div>
+
+          <div className="instruction-note" style={{ background: 'transparent', borderColor: 'rgba(232,232,240,0.06)', color: 'var(--text-primary)', maxHeight: '80px', overflowY: 'auto' }}>
+            QUE: "{note}"
           </div>
-          )}
         </div>
+
+        {finalScore === null && (
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              className={`answer-input${message && !message.includes('VERIFIED') ? ' wrong' : ''}`}
+              placeholder="ENTER DECODED PASSWORD..."
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              style={{ flex: 1, minWidth: '200px' }}
+            />
+            <button className="helipad-submit" onClick={handleSubmit} disabled={!answer.trim()}>
+              SUBMIT
+            </button>
+            <button
+              className="hint-btn"
+              onClick={handleHint}
+              disabled={hintsUsed >= TUTORIAL_HINTS.length || state.hintsRemaining <= 0}
+              style={{ padding: '10px 20px', fontSize: 'var(--text-xs)' }}
+            >
+              REQUEST HINT ({state.hintsRemaining} left)
+            </button>
+          </div>
+        )}
+
+        {message && (
+          <div className={`text-${message.includes('VERIFIED') ? 'green' : 'red'}`} style={{ fontSize: 'var(--text-xs)', marginTop: 'var(--space-2)' }}>
+            {message}
+          </div>
+        )}
+
+        {currentHint && (
+          <div className="hint-display" style={{
+            marginTop: 'var(--space-2)',
+            padding: 'var(--space-3)',
+            borderLeft: '2px solid var(--amber-warn)',
+            fontSize: 'var(--text-xs)',
+            color: 'var(--text-secondary)',
+            lineHeight: '1.6',
+            background: 'transparent',
+          }}>
+            <div className="hint-label" style={{ fontSize: '10px', letterSpacing: '0.1em', marginBottom: '4px' }}>HINT {hintsUsed}/{TUTORIAL_HINTS.length}</div>
+            <div className="hint-text" style={{ fontStyle: 'italic' }}>{currentHint}</div>
+          </div>
+        )}
       </div>
 
       {finalScore !== null && (
-        <FloorComplete
-          floorNum={1}
-          title="THE FIRST SIGNAL"
-          description="You found 9 numbers in the ASCII letter range and converted them to characters."
-          score={finalScore}
-          hintsUsed={hintsUsed}
-          nextFloor={2}
-          onAscend={handleContinue}
-        />
+        <div className="extraction-overlay" style={{ background: 'rgba(1,1,10,0.6)', backdropFilter: 'blur(4px)' }}>
+          <div className="extraction-word">PASSWORD ACCEPTED</div>
+          <div className="extraction-subtext">
+            The grid decoded. The signal is clear.
+            The helicopter blades roar above.
+          </div>
+          <button className="cta-primary mt-4" onClick={handleContinue}>
+            EXTRACT
+          </button>
+        </div>
       )}
     </div>
   );

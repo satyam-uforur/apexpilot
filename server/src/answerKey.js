@@ -147,9 +147,9 @@ function getLevelContent(level) {
       hint: '144 numbers. But only 9 matter. Look for structure, not computation.',
     },
     level1: {
-      title: 'FLOOR 1 — FAULT LINES',
-      description: 'The security module has been corrupted. Find every fault.',
-      instruction: 'Count every error in the corrupted code. Identify the most frequent error category. Submit as: <count><CATEGORY>',
+      title: 'FLOOR 1 — EXTRACTION PROTOCOL',
+      description: 'The pilot needs structured intel from the incident report.',
+      instruction: 'Write a prompt that extracts all 8 required fields as clean JSON. Score 80% or higher to pass.',
       timeLimit: 900,
     },
     level2: {
@@ -160,8 +160,9 @@ function getLevelContent(level) {
     },
     final: {
       title: 'APEX FLOOR — THE FINAL CHALLENGE',
-      description: 'The helicopter awaits. Only one candidate can achieve Apex Rank.',
-      instruction: 'Investigate the scenario. Identify authentic vs fabricated evidence. Submit a verified conclusion with confidence and evidence citations.',
+      description: 'A corrupted signal matrix — 144 data points. The password is hidden within.',
+      instruction: 'Study the 12×12 number grid. Only numbers between 65-90 matter. Find the 9 that fall in the ASCII uppercase letter range, convert them to characters, and read them in grid order.',
+      hint: '144 numbers. But only 9 matter. Look for structure, not computation.',
       timeLimit: 900,
     },
   };

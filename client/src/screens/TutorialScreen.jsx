@@ -107,7 +107,7 @@ export default function TutorialScreen() {
                 </span>
               </div>
 
-              <div style={{
+              <div className="crossword-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(12, 1fr)',
                 gap: '2px',

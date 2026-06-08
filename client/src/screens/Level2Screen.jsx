@@ -223,10 +223,14 @@ export default function Level2Screen() {
           )}
         </div>
 
-        <div className={'right-panel' + (hintsOpen ? '' : ' collapsed')} style={{ display: 'flex', flexDirection: 'column' }}>
+        <div
+          className={'right-panel' + (hintsOpen ? '' : ' collapsed')}
+          style={{ display: 'flex', flexDirection: 'column' }}
+          onClick={() => { if (hintsOpen) setHintsOpen(false); }}
+        >
           <div
             className="hint-panel-header hints-toggle"
-            onClick={() => setHintsOpen(o => !o)}
+            onClick={(e) => { e.stopPropagation(); setHintsOpen(o => !o); }}
             style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--border-dim)', background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', userSelect: 'none' }}
           >
             <span className="hint-panel-title" style={{ fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -239,7 +243,8 @@ export default function Level2Screen() {
               <span className="hints-arrow" style={{ fontSize: '10px', color: 'var(--text-ghost)', transition: 'transform 0.3s ease', transform: hintsOpen ? 'rotate(180deg)' : 'none' }}>▴</span>
             </span>
           </div>
-          <div className="right-panel-scroll" style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-3) var(--space-4)' }}>
+          <div className="right-panel-scroll" onClick={(e) => e.stopPropagation()} style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-3) var(--space-4)' }}>
+            <div className="hint-modal-close" onClick={() => setHintsOpen(false)}>✕</div>
             <button
               className="hint-btn"
               onClick={handleHint}

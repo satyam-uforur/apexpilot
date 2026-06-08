@@ -33,9 +33,9 @@ class SessionManager {
     const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
     return {
       tutorial: pickRandom(['TUT-01', 'TUT-02', 'TUT-03', 'TUT-04', 'TUT-05', 'TUT-06', 'TUT-07', 'TUT-08', 'TUT-09', 'TUT-10']),
-      level1: 'L1-F01',
+      level1: pickRandom(['FIN-01', 'FIN-02', 'FIN-03', 'FIN-04', 'FIN-05']),
       level2: pickRandom(['L2-P01', 'L2-P02', 'L2-P03', 'L2-P04', 'L2-P05']),
-      final: pickRandom(['FIN-01', 'FIN-02', 'FIN-03', 'FIN-04', 'FIN-05']),
+      final: 'L1-F01',
     };
   }
 
@@ -109,9 +109,9 @@ class SessionManager {
     const ls = session.levelStates;
     const weights = {
       tutorial: { observation: 0.4, promptEngineering: 0.2, reasoning: 0.1, verification: 0.1, research: 0.05, adaptability: 0.05, communication: 0.05, competitive: 0.05 },
-      level_1: { observation: 0.1, promptEngineering: 0.25, reasoning: 0.3, verification: 0.25, research: 0.05, adaptability: 0.05, communication: 0, competitive: 0 },
+      level_1: { observation: 0.1, promptEngineering: 0.3, reasoning: 0.2, verification: 0.2, research: 0.05, adaptability: 0.05, communication: 0.05, competitive: 0.05 },
       level_2: { observation: 0.05, promptEngineering: 0.15, reasoning: 0.15, verification: 0.3, research: 0.3, adaptability: 0.05, communication: 0, competitive: 0 },
-      final: { observation: 0.1, promptEngineering: 0.1, reasoning: 0.2, verification: 0.2, research: 0.15, adaptability: 0.1, communication: 0.05, competitive: 0.1 },
+      final: { observation: 0.3, promptEngineering: 0.15, reasoning: 0.25, verification: 0.15, research: 0.05, adaptability: 0.05, communication: 0, competitive: 0.05 },
     };
     const skills = { observation: 0, promptEngineering: 0, reasoning: 0, verification: 0, research: 0, adaptability: 0, communication: 0, competitive: 0 };
     const totalWeights = { observation: 0, promptEngineering: 0, reasoning: 0, verification: 0, research: 0, adaptability: 0, communication: 0, competitive: 0 };
@@ -119,7 +119,7 @@ class SessionManager {
       const w = weights[level];
       if (!w) continue;
       const levelScore = scores.score || 0;
-      const maxScore = { tutorial: 200, level_1: 300, level_2: 300, final: 500 }[level] || 300;
+      const maxScore = { tutorial: 200, level_1: 100, level_2: 300, final: 300 }[level] || 300;
       const normalized = Math.min(levelScore / maxScore, 1);
       for (const [skill, weight] of Object.entries(w)) {
         skills[skill] += normalized * weight * 100;
