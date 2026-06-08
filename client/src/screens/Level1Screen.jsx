@@ -104,7 +104,7 @@ export default function Level1Screen() {
         <div style={{ flex: 1, minHeight: 0 }} />
         <div className="card" style={{
           background: 'transparent', borderColor: 'rgba(232,232,240,0.08)',
-          padding: 'var(--space-4)', overflow: 'auto',
+          padding: 'var(--space-4)', overflowX: 'auto',
         }}>
           <div className="crossword-grid" style={{
             display: 'grid',

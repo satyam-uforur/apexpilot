@@ -895,8 +895,8 @@ h4 { font-size: var(--text-xl); }
     padding-bottom: calc(108px + env(safe-area-inset-bottom, 0px));
   }
   .crossword-grid {
-    max-width: min(320px, 90vw) !important;
-    overflow: hidden;
+    max-width: min(480px, 95vw) !important;
+    overflow: auto;
   }
   .instruction-note {
     margin-top: var(--space-2) !important;
