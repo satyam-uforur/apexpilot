@@ -2,15 +2,16 @@
   "version": 2,
   "buildCommand": "npm run build",
   "installCommand": "npm install && cd server && npm install && cd ../client && npm install",
+  "outputDirectory": "client/dist",
   "functions": {
     "api/index.js": {
-      "includeFiles": "client/dist/**",
       "memory": 256,
       "maxDuration": 10
     }
   },
   "routes": [
     { "src": "/api/(.*)", "dest": "api/index.js" },
+    { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "api/index.js" }
   ]
 }
