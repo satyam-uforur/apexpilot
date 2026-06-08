@@ -486,9 +486,6 @@ h4 { font-size: var(--text-xl); }
   gap: var(--space-4);
   flex-shrink: 0;
 }
-.submission-bar--mobile {
-  display: none;
-}
 .answer-input {
   flex: 1;
   background: var(--bg-surface-2);
@@ -870,9 +867,12 @@ h4 { font-size: var(--text-xl); }
     border-right: none;
     border-bottom: 1px solid var(--border-dim);
     overflow-y: auto;
-    padding-bottom: 0;
+    padding-bottom: 72px;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+  }
+  .pattern-card-l0 {
+    flex: none !important;
   }
   .right-panel {
     position: fixed;
@@ -939,8 +939,9 @@ h4 { font-size: var(--text-xl); }
   .header-timer { font-size: var(--text-sm); }
 
   .submission-bar {
-    position: sticky;
+    position: fixed;
     bottom: 0;
+    left: 0;
     width: 100%;
     height: 56px;
     padding: 0 var(--space-3);
@@ -949,10 +950,7 @@ h4 { font-size: var(--text-xl); }
     background: var(--bg-surface);
     border-top: 1px solid var(--border-dim);
     flex-shrink: 0;
-    z-index: 200;
-  }
-  .right-panel {
-    bottom: 56px;
+    z-index: 999;
   }
   .answer-input { font-size: var(--text-base); height: 44px; min-width: 0; }
   .submit-btn { padding: 10px 24px; font-size: var(--text-lg); white-space: nowrap; }

@@ -127,7 +127,7 @@ export default function Level0Screen() {
               <span className="text-red" style={{ fontWeight: 600 }}>OBJECTIVE:</span> A signal sequence has been intercepted. The pattern is corrupted at position 5. Identify the missing value. The tower wants the ASCII code of that number.
             </p>
 
-            <div className="card" style={{
+            <div className="card pattern-card-l0" style={{
               flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               background: 'var(--bg-void)', borderColor: 'var(--border-dim)',
               padding: 'var(--space-8) var(--space-4)', gap: 'var(--space-4)',
