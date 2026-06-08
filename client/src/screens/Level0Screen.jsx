@@ -153,7 +153,7 @@ export default function Level0Screen() {
               </p>
             </div>
 
-            <div className="card" style={{ background: 'transparent', borderColor: 'var(--border-dim)', padding: 'var(--space-3) var(--space-4)' }}>
+            <div className="card ascii-ref-card" style={{ background: 'transparent', borderColor: 'var(--border-dim)', padding: 'var(--space-3) var(--space-4)' }}>
               <p className="text-ghost" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 'var(--space-2)' }}>
                 ASCII REFERENCE
               </p>

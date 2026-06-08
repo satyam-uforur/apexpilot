@@ -937,6 +937,9 @@ h4 { font-size: var(--text-xl); }
   .left-panel {
     padding-bottom: 56px;
   }
+  .left-panel:focus-within .ascii-ref-card {
+    display: none;
+  }
   .submission-bar {
     position: fixed;
     bottom: 0;
