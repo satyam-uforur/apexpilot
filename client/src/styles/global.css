@@ -856,11 +856,15 @@ h4 { font-size: var(--text-xl); }
 
   .main-content {
     height: calc(100vh - 52px);
-    overflow: hidden;
-  }
-  .screen {
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .main-content::-webkit-scrollbar { width: 6px; }
+  .main-content::-webkit-scrollbar-thumb { background: var(--green-apex); border-radius: 3px; opacity: 0.5; }
+  .screen {
+    overflow: visible;
+    min-height: 100%;
   }
 
   .two-panel {
