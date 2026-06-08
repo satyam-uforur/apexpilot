@@ -934,9 +934,13 @@ h4 { font-size: var(--text-xl); }
   .mission-name { font-size: 10px; }
   .header-timer { font-size: var(--text-sm); }
 
+  .left-panel {
+    padding-bottom: 56px;
+  }
   .submission-bar {
-    position: sticky;
+    position: fixed;
     bottom: 0;
+    left: 0;
     width: 100%;
     height: 56px;
     padding: 0 var(--space-3);
@@ -945,7 +949,7 @@ h4 { font-size: var(--text-xl); }
     background: var(--bg-surface);
     border-top: 1px solid var(--border-dim);
     flex-shrink: 0;
-    z-index: 200;
+    z-index: 999;
   }
   .answer-input { font-size: var(--text-base); height: 44px; min-width: 0; }
   .submit-btn { padding: 10px 24px; font-size: var(--text-lg); white-space: nowrap; }
