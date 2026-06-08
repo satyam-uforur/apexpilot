@@ -120,53 +120,55 @@ export default function Level0Screen() {
       </div>
 
       <div className="two-panel">
-        <div className="left-panel" ref={leftPanelRef}>
-          <div style={{ padding: 'var(--space-5)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', minHeight: 0 }}>
+        <div className="left-panel-wrapper">
+          <div className="left-panel" ref={leftPanelRef}>
+            <div style={{ padding: 'var(--space-5)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', minHeight: 0 }}>
 
-            <p className="text-dim" style={{ fontSize: 'var(--text-xs)', lineHeight: '1.6' }}>
-              <span className="text-red" style={{ fontWeight: 600 }}>OBJECTIVE:</span> A signal sequence has been intercepted. The pattern is corrupted at position 5. Identify the missing value. The tower wants the ASCII code of that number.
-            </p>
-
-            <div className="card pattern-card-l0" style={{
-              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              background: 'var(--bg-void)', borderColor: 'var(--border-dim)',
-              padding: 'var(--space-8) var(--space-4)', gap: 'var(--space-4)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {pattern.seq.map((n, i) => (
-                  <React.Fragment key={i}>
-                    <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '48px', color: 'var(--text-primary)', lineHeight: 1 }}>
-                      {n}
-                    </span>
-                    {i < pattern.seq.length - 1 && (
-                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '32px', color: 'var(--text-ghost)' }}>,</span>
-                    )}
-                  </React.Fragment>
-                ))}
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '32px', color: 'var(--text-ghost)' }}>,</span>
-                <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '48px', color: 'var(--green-apex)', lineHeight: 1, animation: 'floor-pulse 2s ease-in-out infinite' }}>
-                  [?]
-                </span>
-              </div>
-              <p className="text-ghost" style={{ fontSize: 'var(--text-xs)' }}>
-                Each value is a signal unit. The missing unit = next in pattern. Submit the ASCII code of that unit.
+              <p className="text-dim" style={{ fontSize: 'var(--text-xs)', lineHeight: '1.6' }}>
+                <span className="text-red" style={{ fontWeight: 600 }}>OBJECTIVE:</span> A signal sequence has been intercepted. The pattern is corrupted at position 5. Identify the missing value. The tower wants the ASCII code of that number.
               </p>
-            </div>
 
-            <div className="card ascii-ref-card" style={{ background: 'transparent', borderColor: 'var(--border-dim)', padding: 'var(--space-3) var(--space-4)' }}>
-              <p className="text-ghost" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 'var(--space-2)' }}>
-                ASCII REFERENCE
-              </p>
-              <div style={{
-                display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '2px',
-                fontFamily: "'JetBrains Mono', monospace", fontSize: 'var(--text-sm)', textAlign: 'center',
+              <div className="card pattern-card-l0" style={{
+                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                background: 'var(--bg-void)', borderColor: 'var(--border-dim)',
+                padding: 'var(--space-8) var(--space-4)', gap: 'var(--space-4)',
               }}>
-                {ASCII_MAP.map(a => (
-                  <div key={a[0]} style={{ padding: '4px 0', borderBottom: '1px solid var(--border-hairline)' }}>
-                    <div style={{ color: 'var(--text-primary)' }}>{a[0]}</div>
-                    <div style={{ color: 'var(--text-code)', fontSize: 'var(--text-xs)' }}>{a[1]}</div>
-                  </div>
-                ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {pattern.seq.map((n, i) => (
+                    <React.Fragment key={i}>
+                      <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '48px', color: 'var(--text-primary)', lineHeight: 1 }}>
+                        {n}
+                      </span>
+                      {i < pattern.seq.length - 1 && (
+                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '32px', color: 'var(--text-ghost)' }}>,</span>
+                      )}
+                    </React.Fragment>
+                  ))}
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '32px', color: 'var(--text-ghost)' }}>,</span>
+                  <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: '48px', color: 'var(--green-apex)', lineHeight: 1, animation: 'floor-pulse 2s ease-in-out infinite' }}>
+                    [?]
+                  </span>
+                </div>
+                <p className="text-ghost" style={{ fontSize: 'var(--text-xs)' }}>
+                  Each value is a signal unit. The missing unit = next in pattern. Submit the ASCII code of that unit.
+                </p>
+              </div>
+
+              <div className="card ascii-ref-card" style={{ background: 'transparent', borderColor: 'var(--border-dim)', padding: 'var(--space-3) var(--space-4)' }}>
+                <p className="text-ghost" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 'var(--space-2)' }}>
+                  ASCII REFERENCE
+                </p>
+                <div style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: '2px',
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: 'var(--text-sm)', textAlign: 'center',
+                }}>
+                  {ASCII_MAP.map(a => (
+                    <div key={a[0]} style={{ padding: '4px 0', borderBottom: '1px solid var(--border-hairline)' }}>
+                      <div style={{ color: 'var(--text-primary)' }}>{a[0]}</div>
+                      <div style={{ color: 'var(--text-code)', fontSize: 'var(--text-xs)' }}>{a[1]}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
