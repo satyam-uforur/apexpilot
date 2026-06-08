@@ -881,7 +881,7 @@ h4 { font-size: var(--text-xl); }
     border-right: none;
     border-bottom: none;
     overflow-y: auto;
-    padding-bottom: 0;
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
   }

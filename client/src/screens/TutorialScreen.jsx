@@ -96,6 +96,7 @@ export default function TutorialScreen() {
               flex: 1, display: 'flex', flexDirection: 'column',
               background: 'var(--bg-void)', borderColor: 'var(--border-dim)',
               padding: 'var(--space-4)',
+              minHeight: 0,
             }}>
               <div style={{ textAlign: 'center', marginBottom: 'var(--space-3)' }}>
                 <span className="text-muted" style={{ fontSize: 'var(--text-xs)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
