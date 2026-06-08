@@ -169,11 +169,10 @@ export default function Level0Screen() {
                 ))}
               </div>
             </div>
-            <div className="fc-spacer" style={{ height: '56px', flexShrink: 0 }} />
           </div>
 
           {stage !== 'complete' && (
-            <div className="submission-bar">
+            <div className="submission-bar submission-bar--desktop">
               <input
                 type="text"
                 inputMode="numeric"
@@ -253,6 +252,29 @@ export default function Level0Screen() {
           </div>
           )}
         </div>
+
+        {stage !== 'complete' && (
+          <div className="submission-bar submission-bar--mobile">
+            <input
+              type="text"
+              inputMode="numeric"
+              className={`answer-input${message ? ' wrong' : ''}`}
+              placeholder="ENTER ASCII CODE (48-57)..."
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value.replace(/[^0-9]/g, '').slice(0, 3))}
+              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              disabled={timeExpired}
+            />
+            <button className="submit-btn" onClick={handleSubmit} disabled={!answer.trim() || timeExpired}>
+              SUBMIT
+            </button>
+            {message && (
+              <div className={`text-${message.includes('CONFIRMED') ? 'green' : 'red'}`} style={{ fontSize: 'var(--text-xs)' }}>
+                {message}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {stage === 'complete' && (

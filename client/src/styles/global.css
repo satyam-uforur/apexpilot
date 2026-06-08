@@ -486,6 +486,9 @@ h4 { font-size: var(--text-xl); }
   gap: var(--space-4);
   flex-shrink: 0;
 }
+.submission-bar--mobile {
+  display: none;
+}
 .answer-input {
   flex: 1;
   background: var(--bg-surface-2);
@@ -934,10 +937,8 @@ h4 { font-size: var(--text-xl); }
   .mission-name { font-size: 10px; }
   .header-timer { font-size: var(--text-sm); }
 
-  .left-panel:focus-within .ascii-ref-card {
-    display: none;
-  }
-  .submission-bar {
+  .submission-bar--desktop { display: none; }
+  .submission-bar--mobile {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -948,8 +949,10 @@ h4 { font-size: var(--text-xl); }
     gap: var(--space-2);
     background: var(--bg-surface);
     border-top: 1px solid var(--border-dim);
-    flex-shrink: 0;
+    display: flex;
+    align-items: center;
     z-index: 999;
+    flex-shrink: 0;
   }
   .answer-input { font-size: var(--text-base); height: 44px; min-width: 0; }
   .submit-btn { padding: 10px 24px; font-size: var(--text-lg); white-space: nowrap; }
