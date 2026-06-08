@@ -2058,6 +2058,9 @@ input[type="range"].confidence-slider::-webkit-slider-thumb:active { transform: 
   z-index: 0;
 }
 
+/* — GROUND FLOOR: positioning context for absolute children */
+.ground-floor { position: relative; }
+
 /* — GROUND FLOOR: floor header green stripe */
 .ground-header::before {
   content: '';

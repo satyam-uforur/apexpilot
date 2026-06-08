@@ -73,7 +73,6 @@ export default function TutorialScreen() {
     <div className="screen ground-floor">
       <div className="floor-atmosphere" />
       <div className="vignette" />
-      <div className="ground-floor-line" />
       <div className="floor-header ground-header">
         <span className="floor-label">FLOOR 1</span>
         <span className="ground-badge">1</span>

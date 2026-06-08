@@ -52,10 +52,9 @@ export default function EntryScreen() {
   }
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column',
-      overflow: 'auto',
+    <div className="screen" style={{
       background: 'transparent',
+      overflow: 'auto',
     }}>
       <div style={{
         position: 'relative', zIndex: 1, textAlign: 'center',

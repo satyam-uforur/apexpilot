@@ -92,13 +92,13 @@ export default function FinalRaceScreen() {
   const [showEval, setShowEval] = useState(false);
   const [evalPhase, setEvalPhase] = useState(0);
   const [showExtraction, setShowExtraction] = useState(false);
-  const [attempts, setAttempts] = useState(0);
   const [hintsOpen, setHintsOpen] = useState(
     typeof window !== 'undefined' && window.innerWidth > 767
   );
   const [videoFailed, setVideoFailed] = useState(false);
   const videoRef = useRef(null);
   const [startTime] = useState(Date.now());
+  const [remainingAttempts, setRemainingAttempts] = useState(3);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -133,7 +133,7 @@ export default function FinalRaceScreen() {
       dispatch({ type: 'GAME_COMPLETED', payload: { passed: true } });
     }
 
-    setAttempts(a => a + 1);
+    setRemainingAttempts(a => a - 1);
   };
 
   const handleHint = () => {
@@ -181,7 +181,12 @@ export default function FinalRaceScreen() {
     }});
   }, [state, evalResult, startTime]);
 
-  const handleAscend = () => {
+  const handleRetryOrResult = () => {
+    if (!evalResult.passed && remainingAttempts > 0) {
+      setShowEval(false);
+      setEvalResult(null);
+      return;
+    }
     setShowEval(false);
     setShowExtraction(true);
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
@@ -385,8 +390,8 @@ export default function FinalRaceScreen() {
             )}
 
             {evalPhase >= 5 && (
-              <button className="eval-continue" onClick={handleAscend}>
-                {evalResult.passed ? 'ASCEND' : `TRY AGAIN (${3 - attempts} attempts remaining)`}
+              <button className="eval-continue" onClick={handleRetryOrResult}>
+                {evalResult.passed ? 'ASCEND' : remainingAttempts > 0 ? `RETRY (${remainingAttempts} left)` : 'VIEW RESULTS'}
               </button>
             )}
           </div>
