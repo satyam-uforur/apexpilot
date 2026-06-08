@@ -872,6 +872,7 @@ h4 { font-size: var(--text-xl); }
     overflow-y: auto;
     padding-bottom: 0;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
   }
   .right-panel {
     position: fixed;

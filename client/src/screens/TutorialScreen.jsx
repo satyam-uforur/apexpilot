@@ -83,7 +83,7 @@ export default function TutorialScreen() {
 
       <div className="two-panel tutorial-panels">
         <div className="left-panel">
-          <div style={{ padding: 'var(--space-5)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', overflowY: 'auto' }}>
+          <div style={{ padding: 'var(--space-5)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', minHeight: 0 }}>
 
             <div className="card" style={{ borderColor: 'var(--border-dim)', background: 'var(--bg-surface)' }}>
               <p className="text-dim" style={{ fontSize: 'var(--text-sm)', lineHeight: '1.7' }}>
